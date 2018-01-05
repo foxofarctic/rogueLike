@@ -11,18 +11,5 @@ The "Lucas game" is a simple game of survival, progression, and growth.
   * Some items are hidden around the castle, others are dropped by vanquished enemies
 ### Story
 
-
-delete later
-1. find and rescue the missing people
-  * head gardener
-  * assistant gardener
-  * assistant to the assistant gardener
-  * anyone else encountered that needs it
-1. find the fairy
-1. get the fairy to put things back to normal
-  * defeat it in combat
-  * convince it
-  * bribe it / trade it
-  * solve its problems
-
+Lucas has a poor sense of direction. One night on one of his midnight strolls through Mordor, he stumbles his way into a castle full of dangerous creatures. He must find his way out!
 ### Mechanics
