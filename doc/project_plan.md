@@ -6,6 +6,9 @@ This is the project plan for Weed Strike. This covers general planning thoughts 
 1. trivial game working
 1. trivial server-side JS dependency used
 
+- try to do hard stuff early on
+- how important is piece to functionality
+
 - create a game board
 - create a character that can move on the game board
 - implement obstacles/walls and game physics
