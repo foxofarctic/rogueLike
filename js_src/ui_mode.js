@@ -1,6 +1,6 @@
 
 import ROT from 'rot-js';
-
+import {Message} from './Message.js';
 // unspecified mode class
 class UIMode {
   constructor(gameRef) {
@@ -31,10 +31,11 @@ class UIMode {
 export class UIModeStart extends UIMode {
   enter() {
     super.enter();
+    Message.send("entering " + this.constructor.name);
   }
 
   render() {
-    //this.display.drawText(1,1,"game start");
+    this.display.drawText(1,1,"game start");
     this.display.drawText(1,3,"press any key to play");
   }
 
@@ -49,6 +50,7 @@ export class UIModeStart extends UIMode {
 export class UIModePlay extends UIMode {
   enter() {
     super.enter();
+    this.game.messageHandler.clear();
   }
 
   render() {

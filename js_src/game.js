@@ -2,11 +2,15 @@
 import ROT from 'rot-js';
 import * as U from './util.js';
 import {UIModeStart, UIModePlay, UIModeWin, UIModeLose} from './ui_mode.js';
+import {Message} from './message.js' ;
 
 console.log('ROT is:');
 console.dir(ROT);
 
 export let Game = {
+
+  messageHandler: Message,
+
   _mode: {
     start: '',
     play: '',
@@ -51,6 +55,8 @@ export let Game = {
         spacing: this._DISPLAY_SPACING});
     }
 
+    this.messageHandler.init(this.getDisplay('message'));
+
     // initialize mode objects!
     this._mode.start = new UIModeStart(this);
     this._mode.play = new UIModePlay(this);
@@ -67,9 +73,11 @@ export let Game = {
     return null;
   },
 
+  // render our screen on the browser
   render: function() {
     this.renderDisplayAvatar();
     this.renderDisplayMain();
+    this.renderMessage();
   },
 
   renderDisplayAvatar: function() {
@@ -78,6 +86,10 @@ export let Game = {
     for (let i = 0; i < 10; i++) {
       d.drawText(5,i+5,"avatar");
     }
+  },
+
+  renderMessage: function() {
+     this.messageHandler.render();
   },
 
   renderDisplayMain: function() {

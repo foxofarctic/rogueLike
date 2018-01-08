@@ -13,3 +13,11 @@ The "Lucas game" is a simple game of survival, progression, and growth.
 
 Lucas has a poor sense of direction. One night on one of his midnight strolls through Mordor, he stumbles his way into a castle full of dangerous creatures. He must find his way out!
 ### Mechanics
+
+### Notes
+
+git:
+  * file system = working directory - local
+  * move to staging area using add command (remove using reset) - local
+  * move to repository using commit (checkout gets old version) - local
+  * move to remotes using push (pull takes from remotes to working directory) - remote
