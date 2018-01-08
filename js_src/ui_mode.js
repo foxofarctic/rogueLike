@@ -1,16 +1,20 @@
 
+import ROT from 'rot-js';
+
+// unspecified mode class
 class UIMode {
-  constructor(){
-    console.log("created " + this.constructor.name);
+  constructor(gameRef) {
+    console.log("created" + this.constructor.name) ;
   }
 
-  enter(){
-    console.log("entering " + this.constructor.name);
+  enter() {
+     console.log(`UIMode enter - ${this.constructor.name}`);
   }
-  exit(){
-    console.log("exiting " + this.constructor.name);
+  exit() {
+    console.log(`UIMode exit - ${this.constructor.name}`);
   }
-  //given an action from user, change the game state
+  render() { console.log(`UIMode render - ${this.constructor.name}`);
+  }
   handleInput(inputType,inputData) {
     console.log(`UIMode handleInput - ${this.constructor.name}`);
     UIMode.dumpInput(inputType,inputData);
@@ -23,45 +27,34 @@ class UIMode {
   }
 }
 
-// notes:
-// can't have properties in javascript class
-// instance of class uses "this" operator
-
-//inheritance
-export class StartupMode extends UIMode{
-  constructor(){
-    // accesses classes parents
-    super();
-  }
-
-  render(display){
-    console.log("rendering " + this.constructor.name);
-    display.drawText(2,2,"rendering" + this.constructor.name);
-    display.drawText(2,4,".____                                 ");
-    display.drawText(2,5,"|    |    __ __   ____ _____    ______");
-    display.drawText(2,6,"|    |   |  |  \\_/ ___\\__  \\  /  ___/");
-    display.drawText(2,7,"|    |___|  |  /\\  \\___ / __ \\_\\___ \\ ");
-    display.drawText(2,8,"|_______ \\____/  \\___  >____  /____  >");
-    display.drawText(2,9,"        \\/           \\/     \\/     \\/ ");
-  }
-
-
-  handleInput(inputType,inputData) {
-    if (inputData.charCode !== 0) { // ignore the various modding keys - control, shift, etc.
-      this.game.switchMode('play');
-    }
-  }
-}
-
-export class PlayMode extends UIMode {
+// starting mode
+export class UIModeStart extends UIMode {
   enter() {
     super.enter();
   }
 
   render() {
-    this.display.drawText(1,1,"game play",UIColor.FG,UIColor.BG);
-    this.display.drawText(1,3,"press any [Enter] to win",UIColor.FG,UIColor.BG);
-    this.display.drawText(1,5,"press any [Escape] to lose",UIColor.FG,UIColor.BG);
+    //this.display.drawText(1,1,"game start");
+    this.display.drawText(1,3,"press any key to play");
+  }
+
+  handleInput(inputType,inputData) {
+    if (inputData.charCode !== 0) {
+      this.game.switchMode('play');
+    }
+  }
+}
+
+// mode play
+export class UIModePlay extends UIMode {
+  enter() {
+    super.enter();
+  }
+
+  render() {
+    this.display.drawText(1,1,"game play");
+    this.display.drawText(1,3,"press any [Enter] to win");
+    this.display.drawText(1,5,"press any [Escape] to lose");
   }
 
   handleInput(inputType,inputData) {
@@ -78,17 +71,19 @@ export class PlayMode extends UIMode {
   }
 }
 
-// this code seems to break it
-// export class WinMode extends UIMode {
-//   render() {
-//     this.display.drawText(1,1,"game win",UIColor.FG,UIColor.BG);
-//     this.display.drawText(1,3,"you WIN!!!",UIColor.FG,UIColor.BG);
-//   }
-// }
-//
-// export class LoseMode extends UIMode(){
-//   render() {
-//     this.display.drawText(1,1,"game lose",UIColor.FG,UIColor.BG);
-//     this.display.drawText(1,3,"you lose :(",UIColor.FG,UIColor.BG);
-//   }
-// }
+
+// winning mode
+export class UIModeWin extends UIMode {
+  render() {
+    this.display.drawText(1,1,"game win");
+    this.display.drawText(1,3,"you WIN!!");
+  }
+}
+
+//losing mode
+export class UIModeLose extends UIMode {
+  render() {
+    this.display.drawText(1,1,"game lose");
+    this.display.drawText(1,3,"you lose.");
+  }
+}
