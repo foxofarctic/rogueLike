@@ -115,6 +115,10 @@ export let Game = {
     }
   },
 
+  setupNewGame: function(){
+
+  },
+
   switchMode: function (newMode) {
     if (typeof newMode == 'string' || newMode instanceof String) {
       if (this._mode.hasOwnProperty(newMode)) {
@@ -132,5 +136,13 @@ export let Game = {
       this._curMode.enter();
     }
     this.render();
+  },
+
+  toJSon: function (){
+
+  },
+
+  fromJSon: function (){
+
   }
 };
