@@ -1,10 +1,12 @@
 
 import ROT from 'rot-js';
-import {Message} from './Message.js';
+//import {Message} from './Message.js';
 // unspecified mode class
 class UIMode {
   constructor(gameRef) {
     console.log("created" + this.constructor.name) ;
+    this.game = gameRef;
+    this.display = this.game.getDisplay("main");
   }
 
   enter() {
@@ -31,7 +33,7 @@ class UIMode {
 export class UIModeStart extends UIMode {
   enter() {
     super.enter();
-    Message.send("entering " + this.constructor.name);
+    this.game.messageHandler.send("entering " + this.constructor.name);
   }
 
   render() {
@@ -57,6 +59,7 @@ export class UIModePlay extends UIMode {
     this.display.drawText(1,1,"game play");
     this.display.drawText(1,3,"press any [Enter] to win");
     this.display.drawText(1,5,"press any [Escape] to lose");
+    this.game.messageHandler.send("entering " + this.constructor.name);
   }
 
   handleInput(inputType,inputData) {
@@ -79,6 +82,7 @@ export class UIModeWin extends UIMode {
   render() {
     this.display.drawText(1,1,"game win");
     this.display.drawText(1,3,"you WIN!!");
+    this.game.messageHandler.send("entering " + this.constructor.name);
   }
 }
 
@@ -87,5 +91,6 @@ export class UIModeLose extends UIMode {
   render() {
     this.display.drawText(1,1,"game lose");
     this.display.drawText(1,3,"you lose.");
+    this.game.messageHandler.send("entering " + this.constructor.name);
   }
 }

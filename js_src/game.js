@@ -84,7 +84,7 @@ export let Game = {
     let d = this._display.avatar.o;
     d.clear();
     for (let i = 0; i < 10; i++) {
-      d.drawText(5,i+5,"avatar");
+      d.drawText(5,i+5,"Welcome");
     }
   },
 
