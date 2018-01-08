@@ -13,6 +13,7 @@ export let Game = {
 
   _mode: {
     start: '',
+    persistence: '',
     play: '',
     win: '',
     lose: ''
@@ -39,6 +40,12 @@ export let Game = {
     }
   },
 
+  _STATE: {},
+  _PERSIST_NAMESPACE: 'LucasGame',
+
+  isPlaying: false,
+  hasSaved: false,
+
   init: function() {
     console.log("Game object:");
     console.dir(Game);
@@ -54,16 +61,18 @@ export let Game = {
         height: this._display[display_key].h,
         spacing: this._DISPLAY_SPACING});
     }
-
     this.messageHandler.init(this.getDisplay('message'));
+    this.setupModes();
+  },
 
+  setupModes: function() {
     // initialize mode objects!
     this._mode.start = new UIModeStart(this);
+    this._mode.persistence = new UIModePersistence(this); // need to implement in uimode
     this._mode.play = new UIModePlay(this);
     this._mode.win = new UIModeWin(this);
     this._mode.lose = new UIModeLose(this);
-
-    this.switchMode('start');
+    //this.switchMode('start');
   },
 
   getDisplay: function (displayId) {
