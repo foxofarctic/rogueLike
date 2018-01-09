@@ -1,7 +1,7 @@
 
 import ROT from 'rot-js';
 import * as U from './util.js';
-import {UIModeStart, UIModePlay, UIModeWin, UIModeLose} from './ui_mode.js';
+import {UIModeStart, UIModePlay, UIModeWin, UIModeLose, UIModePersistence} from './ui_mode.js';
 import {Message} from './message.js' ;
 
 console.log('ROT is:');
@@ -50,19 +50,14 @@ export let Game = {
     console.log("Game object:");
     console.dir(Game);
 
-    this._randomSeed = 5 + Math.floor(Math.random()*100000);
+    // this._randomSeed = 5 + Math.floor(Math.random()*100000);
     //this._randomSeed = 76250;
     console.log("using random seed "+this._randomSeed);
     ROT.RNG.setSeed(this._randomSeed);
-
-    for (var display_key in this._display) {
-      this._display[display_key].o = new ROT.Display({
-        width: this._display[display_key].w,
-        height: this._display[display_key].h,
-        spacing: this._DISPLAY_SPACING});
-    }
-    this.messageHandler.init(this.getDisplay('message'));
+    this.setupDisplays();
     this.setupModes();
+    this.messageHandler.init(this.getDisplay('message'));
+    this.switchMode('launch');
   },
 
   setupModes: function() {
@@ -73,6 +68,15 @@ export let Game = {
     this._mode.win = new UIModeWin(this);
     this._mode.lose = new UIModeLose(this);
     //this.switchMode('start');
+  },
+
+  setupDisplays: function() {
+    for (var display_key in this._display) {
+      this._display[display_key].o = new ROT.Display({
+        width: this._display[display_key].w,
+        height: this._display[display_key].h,
+        spacing: this._DISPLAY_SPACING});
+    }
   },
 
   getDisplay: function (displayId) {
@@ -125,7 +129,10 @@ export let Game = {
   },
 
   setupNewGame: function(){
-
+    this._STATE.randomSeed = 5 + Math.floor(Math.random()*100000);
+    //this._STATE._randomSeed = 76250;
+    console.log("using random seed "+this._STATE._randomSeed);
+    ROT.RNG.setSeed(this._STATE._randomSeed);
   },
 
   switchMode: function (newMode) {
@@ -147,11 +154,14 @@ export let Game = {
     this.render();
   },
 
-  toJSon: function (){
-
+  toJSON: function (){
+    console.log("TODO: implement serialize game");
+    var s = JSON.stringify(this._STATE);
+    return s;
   },
 
-  fromJSon: function (){
-
+  fromJSON: function (){
+    console.log("TODO: implement deserialize game");
+    this._STATE = JSON.parse(serializedGameState);
   }
 };
