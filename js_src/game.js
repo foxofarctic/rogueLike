@@ -57,7 +57,7 @@ export let Game = {
     this.setupDisplays();
     this.setupModes();
     this.messageHandler.init(this.getDisplay('message'));
-    this.switchMode('launch');
+    this.switchMode('start');
   },
 
   setupModes: function() {

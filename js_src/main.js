@@ -4,7 +4,7 @@ import {Game} from './game.js';
 
 window.onload = function() {
   console.log("starting WSRL - window loaded");
-  
+
   if (!ROT.isSupported()) {
     alert("The rot library does not function in your browser.");
     return;
@@ -17,6 +17,6 @@ window.onload = function() {
   document.getElementById('ws-main-display').appendChild(Game.getDisplay('main').getContainer());
   document.getElementById('ws-message-display').appendChild(Game.getDisplay('message').getContainer());
 
-  Game.bindEvent('keypress');
-  Game.bindEvent('keydown');
+  Game.bindEvent('keyup');
+
 };

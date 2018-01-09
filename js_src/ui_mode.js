@@ -1,6 +1,8 @@
 
 import ROT from 'rot-js';
-import {Map} from
+import {Map} from './map.js';
+import {DisplaySymbol} from './displaySym.js';
+
 // unspecified mode class
 class UIMode {
   constructor(gameRef) {
@@ -42,7 +44,8 @@ export class UIModeStart extends UIMode {
   }
 
   handleInput(inputType,inputData) {
-    if (inputData.charCode !== 0) {
+    super.handleInput(inputType, inputData);
+    if (inputData.keyCode !== 0) {
       this.game.switchMode('persistence');
     }
   }
@@ -66,10 +69,10 @@ export class UIModePersistence extends UIMode{
   }
 
   handleInput(inputType,inputData) {
-    // super.handleInput(inputType,inputData);
+    super.handleInput(inputType,inputData);
     if (inputType == 'keyup') {
       if (inputData.key == 'n' || inputData.key == 'N') {
-        this.game.startNewGame();
+        //this.game.setupNewGame();
         this.game.messageHandler.send("New game started");
         this.game.switchMode('play');
       }
@@ -95,7 +98,7 @@ export class UIModePersistence extends UIMode{
     if (! this.localStorageAvailable()) {
       return;
     }
-    let serializedGameState = this.game.serialize();
+    let serializedGameState = this.game.toJSON();
     window.localStorage.setItem(this.game._PERSISTANCE_NAMESPACE,serializedGameState);
     this.game.hasSaved = true;
     this.game.messageHandler.send("Game saved");
@@ -107,7 +110,7 @@ export class UIModePersistence extends UIMode{
       return;
     }
     let serializedGameState = window.localStorage.getItem(this.game._PERSISTANCE_NAMESPACE);
-    this.game.deserialize(serializedGameState);
+    this.game.fromJSON(serializedGameState);
     this.game.messageHandler.send("Game loaded");
     this.game.switchMode('play');
   }
@@ -131,9 +134,11 @@ export class UIModePersistence extends UIMode{
 export class UIModePlay extends UIMode {
   enter() {
     if (! this.map){
-      this.map = new Map(4,3);
+      this.map = new Map(20,20);
     }
-    super.enter();
+    this.camerax = 5;
+    this.cameray = 8;
+    this.cameraSymbol = new DisplaySymbol('@','#eb4');
     this.game.messageHandler.clear();
     this.game.isPlaying = true;
   }
@@ -143,23 +148,34 @@ export class UIModePlay extends UIMode {
     this.display.drawText(1,3,"press any [Enter] to win");
     this.display.drawText(1,5,"press any [Escape] to lose");
     this.game.messageHandler.send("entering " + this.constructor.name);
-    this.map.render(display,0,0);
+    this.map.render(this.display,this.camerax,this.cameray);
+    this.cameraSymbol.render(this.display, this.display.getOptions().width/2, this.display.getOptions().height/2);
   }
 
   handleInput(inputType,inputData) {
-    if (inputType == 'keypress') {
+    if (inputType == 'keyup') {
       if (inputData.keyCode == ROT.VK_ENTER || inputData.keyCode == ROT.VK_RETURN) {
         this.game.switchMode('win');
       }
     }
-    else if (inputType == 'keydown') {
+    else if (inputType == 'keyup') {
       if (inputData.keyCode == ROT.VK_ESCAPE) {
         this.game.switchMode('lose');
       }
     }
+
+    if (inputData.key === '7') {
+      this.moveCamera(-1,-1);
+      return true;
+    }
+    return false;
+  }
+
+  moveCamera(dx,dy){
+    this.cameramapx += dx;
+    this.cameramapy += dy;
   }
 }
-
 
 // winning mode
 export class UIModeWin extends UIMode {

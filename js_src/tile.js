@@ -1,6 +1,7 @@
 // class for individual map tiles
 
 import {DisplaySymbol} from './displaySym.js';
+
 class Tile extends DisplaySymbol{
 
   constructor(name, chr, fg, bg){
@@ -9,8 +10,8 @@ class Tile extends DisplaySymbol{
   }
 }
 
-let TILES = {
-    NULLTILE: new TILE('nullTile', '#'),
-    WALL: new TILE('wall', '#'),
-    FLOOR: new TILE('floor', '.')
+export let TILES = {
+    NULLTILE: new Tile('nullTile', '#'),
+    WALL: new Tile('wall', '#'),
+    FLOOR: new Tile('floor', '.')
 }
