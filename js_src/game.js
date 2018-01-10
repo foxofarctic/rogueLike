@@ -3,6 +3,8 @@ import ROT from 'rot-js';
 import * as U from './util.js';
 import {UIModeStart, UIModePlay, UIModeWin, UIModeLose, UIModePersistence} from './ui_mode.js';
 import {Message} from './message.js' ;
+import {DATASTORE, clearDataStore} from './datastore.js';
+
 
 console.log('ROT is:');
 console.dir(ROT);
@@ -40,26 +42,47 @@ export let Game = {
     }
   },
 
-  _STATE: {},
+  //_STATE: {},
+
+  //constant name of game
   _PERSIST_NAMESPACE: 'LucasGame',
 
   isPlaying: false,
   hasSaved: false,
 
+  // initialize game
   init: function() {
     console.log("Game object:");
     console.dir(Game);
 
+    console.log("datastore object: ");
+    console.dir(DATASTORE);
+    //DATASTORE.GAME = this;
     // this._randomSeed = 5 + Math.floor(Math.random()*100000);
     //this._randomSeed = 76250;
-    console.log("using random seed "+this._randomSeed);
-    ROT.RNG.setSeed(this._randomSeed);
+    //console.log("using random seed "+this._randomSeed);
+    //ROT.RNG.setSeed(this._randomSeed);
+
     this.setupDisplays();
     this.setupModes();
     this.messageHandler.init(this.getDisplay('message'));
     this.switchMode('start');
   },
 
+  setupNewGame: function(){
+    //this._STATE.randomSeed = 5 + Math.floor(Math.random()*100000);
+    //this._STATE._randomSeed = 76250;
+    //console.log("using random seed "+this._STATE._randomSeed);
+    //ROT.RNG.setSeed(this._STATE._randomSeed);
+    console.log("starting new game") ;
+    clearDataStore();
+    DATASTORE.GAME = this;
+    console.log("datastore:");
+    console.dir(DATASTORE);
+    this._mode.play.setupNewGame();
+  },
+
+  // initialize all mode objects
   setupModes: function() {
     // initialize mode objects!
     this._mode.start = new UIModeStart(this);
@@ -97,7 +120,7 @@ export let Game = {
     let d = this._display.avatar.o;
     d.clear();
     for (let i = 0; i < 10; i++) {
-      d.drawText(5,i+5,"Welcome");
+      d.drawText(5,i+5,"Avatar");
     }
   },
 
@@ -114,6 +137,7 @@ export let Game = {
     }
   },
 
+  // recognize events that occur (keyups)
   bindEvent: function(eventType) {
     window.addEventListener(eventType, (evt) => {
       this.eventHandler(eventType, evt);
@@ -126,13 +150,6 @@ export let Game = {
         this._curMode.handleInput(eventType, evt);
         this.render();
     }
-  },
-
-  setupNewGame: function(){
-    this._STATE.randomSeed = 5 + Math.floor(Math.random()*100000);
-    //this._STATE._randomSeed = 76250;
-    console.log("using random seed "+this._STATE._randomSeed);
-    ROT.RNG.setSeed(this._STATE._randomSeed);
   },
 
   switchMode: function (newMode) {
@@ -154,14 +171,13 @@ export let Game = {
     this.render();
   },
 
+  // serializes game state
   toJSON: function (){
-    console.log("TODO: implement serialize game");
-    var s = JSON.stringify(this._STATE);
-    return s;
+    return this._mode.play.toJSON();
   },
 
-  fromJSON: function (){
-    console.log("TODO: implement deserialize game");
-    this._STATE = JSON.parse(serializedGameState);
+  // gets game state from serialized game state
+  fromJSON: function (json){
+    this._mode.play.fromJSON(json);
   }
 };

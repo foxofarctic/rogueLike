@@ -1,3 +1,5 @@
+import {DATASTORE} from './datastore.js';
+
 export function utilAlert() {
   document.write("this is a util function<br/>");
 
@@ -18,10 +20,13 @@ export function init2DArray(xdim,ydim,initialValue){
   return a;
 }
 
-let randCharSource = '1234567890abcdefghijk;slmnopqrstuvwxyz'.split('');
-export function uniqueId(){
+let randCharSource = '1234567890abcdefghijkslmnopqrstuvwxyz'.split('');
+export function uniqueId(tag){
+  let id = '';
   for(let i=0; i<8;i++){
     id += randCharSource.random();
   }
+  id = `${tag ? tag + '-' : '' }${DATASTORE.ID_SEQ}-${id}`;// + '-' +id;
+  DATASTORE.ID_SEQ++;
   return id
 }

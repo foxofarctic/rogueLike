@@ -1,12 +1,13 @@
 
 import ROT from 'rot-js';
 import {MapMaker} from './map.js';
+import {Color} from './color.js';
 import {DisplaySymbol} from './displaySym.js';
+import {DATASTORE,clearDataStore} from './datastore.js';
 
 // unspecified mode class
 class UIMode {
   constructor(gameRef) {
-    console.log("created" + this.constructor.name) ;
     this.game = gameRef;
     this.display = this.game.getDisplay("main");
   }
@@ -39,40 +40,44 @@ export class UIModeStart extends UIMode {
   }
 
   render() {
-    this.display.drawText(1,1,"game start");
-    this.display.drawText(1,3,"press any key to play");
+    this.display.drawText(1, 1, "game start", Color.FG, Color.BG);
+    this.display.drawText(1, 3, "press any key to play", Color.FG, Color.BG);
   }
 
   handleInput(inputType,inputData) {
-    super.handleInput(inputType, inputData);
-    if (inputData.keyCode !== 0) {
+    // super.handleInput(inputType, inputData);
+    if (inputData.keyCode !== 0 && inputType == 'keyup') {
       this.game.switchMode('persistence');
     }
   }
 }
 
+// persistence mode for Save, Load, New Game
 export class UIModePersistence extends UIMode{
   enter(){
     super.enter();
+    if (window.localStorage.getItem(this.game._PERSIST_NAMESPACE)){
+      this.game.hasSaved = true;
+    }
   }
 
   render(){
-    this.display.drawText(1,1,"Game Control");
-    this.display.drawText(5,3,"N - Start new game");
+    this.display.drawText(1, 1, "Game Control", Color.FG, Color.BG);
+    this.display.drawText(5 , 3, "N - Start new game", Color.FG, Color.BG);
     if (this.game.isPlaying) {
-      this.display.drawText(5,4,"S - Save your current game");
-      this.display.drawText(1,8,"[Escape] - cancel/return to play");
+      this.display.drawText(5, 4, "S - Save your current game", Color.FG, Color.BG);
+      this.display.drawText(1, 8, "[Escape] - cancel/return to play", Color.FG, Color.BG);
     }
     if (this.game.hasSaved){
-      this.display.drawText(5,4,"L - load saved game");
+      this.display.drawText(5, 4, "L - load saved game", Color.FG, Color.BG);
     }
   }
 
   handleInput(inputType,inputData) {
-    super.handleInput(inputType,inputData);
+    // super.handleInput(inputType,inputData);
     if (inputType == 'keyup') {
       if (inputData.key == 'n' || inputData.key == 'N') {
-        //this.game.setupNewGame();
+        this.game.setupNewGame();
         this.game.messageHandler.send("New game started");
         this.game.switchMode('play');
       }
@@ -98,8 +103,8 @@ export class UIModePersistence extends UIMode{
     if (! this.localStorageAvailable()) {
       return;
     }
-    let serializedGameState = this.game.toJSON();
-    window.localStorage.setItem(this.game._PERSISTANCE_NAMESPACE,serializedGameState);
+    //let serializedGameState = this.game.toJSON();
+    window.localStorage.setItem(this.game._PERSIST_NAMESPACE,JSON.stringify(DATASTORE)) ;
     this.game.hasSaved = true;
     this.game.messageHandler.send("Game saved");
     this.game.switchMode('play');
@@ -109,9 +114,25 @@ export class UIModePersistence extends UIMode{
     if (! this.localStorageAvailable()) {
       return;
     }
-    let serializedGameState = window.localStorage.getItem(this.game._PERSISTANCE_NAMESPACE);
-    this.game.fromJSON(serializedGameState);
-    this.game.messageHandler.send("Game loaded");
+    let serializedGameState = window.localStorage.getItem(this.game._PERSIST_NAMESPACE);
+    //this.game.fromJSON(serializedGameState);
+    // this.game.messageHandler.send("Game loaded");
+    // this.game.switchMode('play');
+    let savedState = JSON.parse(serializedGameState);
+    clearDataStore();
+
+    //DATASTORE = JSON.parse(serializedGameState);
+    //DATASTORE.ID_SEQ = state.ID_SEQ;
+    DATASTORE.GAME = this.game;
+    this.game.fromJSON(savedState.GAME);
+
+
+    // gets Id and deserializes it to retrieve map object and the makes map
+    for (let savedMapId in savedState.MAPS) {
+      MapMaker(JSON.parse(savedState.MAPS[savedMapId]));
+    }
+
+    this.game.messageHandler.send("Game Loaded");
     this.game.switchMode('play');
   }
 
@@ -124,19 +145,30 @@ export class UIModePersistence extends UIMode{
       return true;
     }
     catch(e) {
-      this.game.messageHandler.send('Sorry, no local data storage is available for this browser so game save/load is not possible');
+      this.game.messageHandler.send('Sorry, no local data storage is available, so no save/load possible');
       return false;
     }
   }
 }
 
+//start checking here
 // mode play
 export class UIModePlay extends UIMode {
+  constructor(gameRef) {
+    super(gameRef);
+    this.state ={
+      mapId: '',
+      cameramapx: '',
+      cameramapy: ''
+    };
+  }
+
   enter() {
     if (! this.map){
       //this.map = new Map(20,20);
-      this.map = MapMaker(20,20);
-
+      let m = MapMaker(20,20);
+      this.state.mapId = m.getId
+      m.build();
     }
     this.camerax = 5;
     this.cameray = 8;
@@ -145,12 +177,25 @@ export class UIModePlay extends UIMode {
     this.game.isPlaying = true;
   }
 
+  toJSON(){
+    json = JSON.stringify({rseed: this._randomSeed,
+      playModeState: this.modes.play
+    });
+    return json;
+  }
+
+  restoreFromState(stateData){
+    console.log('res');
+    console.dir(stateData);
+    this.state = stateData;
+  }
+
   render() {
     // this.display.drawText(1,1,"game play");
     // this.display.drawText(1,3,"press any [Enter] to win");
     // this.display.drawText(1,5,"press any [Escape] to lose");
     this.game.messageHandler.send("entering " + this.constructor.name);
-    this.map.render(this.display,this.camerax,this.cameray);
+    DATASTORE.MAPS[this.state.mapID].render(this.display,this.camerax,this.cameray);
     this.cameraSymbol.render(this.display, this.display.getOptions().width/2, this.display.getOptions().height/2);
   }
 
