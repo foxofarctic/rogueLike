@@ -1,6 +1,6 @@
 
 import ROT from 'rot-js';
-import {Map} from './map.js';
+import {MapMaker} from './map.js';
 import {DisplaySymbol} from './displaySym.js';
 
 // unspecified mode class
@@ -134,7 +134,9 @@ export class UIModePersistence extends UIMode{
 export class UIModePlay extends UIMode {
   enter() {
     if (! this.map){
-      this.map = new Map(20,20);
+      //this.map = new Map(20,20);
+      this.map = MapMaker(20,20);
+
     }
     this.camerax = 5;
     this.cameray = 8;
@@ -144,36 +146,67 @@ export class UIModePlay extends UIMode {
   }
 
   render() {
-    this.display.drawText(1,1,"game play");
-    this.display.drawText(1,3,"press any [Enter] to win");
-    this.display.drawText(1,5,"press any [Escape] to lose");
+    // this.display.drawText(1,1,"game play");
+    // this.display.drawText(1,3,"press any [Enter] to win");
+    // this.display.drawText(1,5,"press any [Escape] to lose");
     this.game.messageHandler.send("entering " + this.constructor.name);
     this.map.render(this.display,this.camerax,this.cameray);
     this.cameraSymbol.render(this.display, this.display.getOptions().width/2, this.display.getOptions().height/2);
   }
 
   handleInput(inputType,inputData) {
+    // super.handleInput(inputType,inputData);
     if (inputType == 'keyup') {
-      if (inputData.keyCode == ROT.VK_ENTER || inputData.keyCode == ROT.VK_RETURN) {
+      this.game.messageHandler.send(`you pressed the ${inputData.key} key`);
+      if (inputData.key == 'w') {
         this.game.switchMode('win');
       }
-    }
-    else if (inputType == 'keyup') {
-      if (inputData.keyCode == ROT.VK_ESCAPE) {
+      else if (inputData.key == 'l') {
         this.game.switchMode('lose');
       }
-    }
+      else if (inputData.key == '=') {
+        this.game.switchMode('persistence');
+      }
 
-    if (inputData.key === '7') {
-      this.moveCamera(-1,-1);
-      return true;
+      // navigation (keeping in mind that top left is 0,0, so positive y moves you down)
+      else if (inputData.key == '1') {
+        this.moveCamera(-1,1);
+      }
+      else if (inputData.key == '2') {
+        this.moveCamera(0,1);
+      }
+      else if (inputData.key == '3') {
+        this.moveCamera(1,1);
+      }
+      else if (inputData.key == '4') {
+        this.moveCamera(-1,0);
+      }
+      else if (inputData.key == '5') {
+        this.moveCamera(0,0);
+      }
+      else if (inputData.key == '6') {
+        this.moveCamera(1,0);
+      }
+      else if (inputData.key == '7') {
+        this.moveCamera(-1,-1);
+      }
+      else if (inputData.key == '8') {
+        this.moveCamera(0,-1);
+      }
+      else if (inputData.key == '9') {
+        this.moveCamera(1,-1);
+      }
     }
-    return false;
   }
 
   moveCamera(dx,dy){
-    this.cameramapx += dx;
-    this.cameramapy += dy;
+    let newX = this._STATE.cameraMapLoc.x + x;
+    let newY = this._STATE.cameraMapLoc.y + y;
+    if (newX < 0 || newX > this._STATE.curMap.getXDim() - 1) { return; }
+    if (newY < 0 || newY > this._STATE.curMap.getYDim() - 1) { return; }
+   this._STATE.cameraMapLoc.x = newX;
+   this._STATE.cameraMapLoc.y = newY;
+   this.render();
   }
 }
 

@@ -17,3 +17,11 @@ export function init2DArray(xdim,ydim,initialValue){
   }
   return a;
 }
+
+let randCharSource = '1234567890abcdefghijk;slmnopqrstuvwxyz'.split('');
+export function uniqueId(){
+  for(let i=0; i<8;i++){
+    id += randCharSource.random();
+  }
+  return id
+}
