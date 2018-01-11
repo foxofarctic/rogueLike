@@ -154,49 +154,67 @@ export class UIModePersistence extends UIMode{
 //start checking here
 // mode play
 export class UIModePlay extends UIMode {
-  constructor(gameRef) {
-    super(gameRef);
-    this.state ={
-      mapId: '',
-      cameramapx: '',
-      cameramapy: ''
+  // constructor(gameRef) {
+  //   super.enter();
+  //   this.state ={
+  //     mapId: '',
+  //     cameramapx: '',
+  //     cameramapy: ''
+  //   };
+  // }
+
+  enter() {
+    super.enter();
+    // if (! this.map){
+    //   //this.map = new Map(20,20);
+    //   let m = MapMaker(20,20);
+    //   this.state.mapId = m.getId
+    //   m.build();
+    // }
+    // this.camerax = 5;
+    // this.cameray = 8;
+    // this.cameraSymbol = new DisplaySymbol('@','#eb4');
+    // this.game.messageHandler.clear();
+    this.game.isPlaying = true;
+    this.avatarSym = new DisplaySymbol('@','#ee1');
+  }
+
+  startNewGame() {
+    this._STATE = {};
+    let m = MapMaker({xdim:60,ydim:20});
+    this._STATE.curMapId = m.getId();
+    this._STATE.cameraMapLoc = {
+      x: Math.round(m.getXDim()/2),
+      y: Math.round(m.getYDim()/2)
+    };
+    this._STATE.cameraDisplayLoc = {
+      x: Math.round(this.display.getOptions().width/2),
+      y: Math.round(this.display.getOptions().height/2)
     };
   }
 
-  enter() {
-    if (! this.map){
-      //this.map = new Map(20,20);
-      let m = MapMaker(20,20);
-      this.state.mapId = m.getId
-      m.build();
-    }
-    this.camerax = 5;
-    this.cameray = 8;
-    this.cameraSymbol = new DisplaySymbol('@','#eb4');
-    this.game.messageHandler.clear();
-    this.game.isPlaying = true;
-  }
-
   toJSON(){
-    json = JSON.stringify({rseed: this._randomSeed,
-      playModeState: this.modes.play
-    });
-    return json;
+     return JSON.stringify(this._STATE);
   }
 
-  restoreFromState(stateData){
-    console.log('res');
-    console.dir(stateData);
-    this.state = stateData;
+  fromJSON(){
+    this._STATE = JSON.parse(json);
   }
+
+  // restoreFromState(stateData){
+  //   console.log('res');
+  //   console.dir(stateData);
+  //   this.state = stateData;
+  // }
 
   render() {
     // this.display.drawText(1,1,"game play");
     // this.display.drawText(1,3,"press any [Enter] to win");
     // this.display.drawText(1,5,"press any [Escape] to lose");
     this.game.messageHandler.send("entering " + this.constructor.name);
-    DATASTORE.MAPS[this.state.mapID].render(this.display,this.camerax,this.cameray);
-    this.cameraSymbol.render(this.display, this.display.getOptions().width/2, this.display.getOptions().height/2);
+    DATASTORE.MAPS[this._STATE.curMapId].render(this.display,
+    this._STATE.cameraMapLoc.x,this._STATE.cameraMapLoc.y);
+    this.avatarSym.render(this.display,this._STATE.cameraDisplayLoc.x,this._STATE.cameraDisplayLoc.y);
   }
 
   handleInput(inputType,inputData) {
@@ -245,10 +263,10 @@ export class UIModePlay extends UIMode {
   }
 
   moveCamera(dx,dy){
-    let newX = this._STATE.cameraMapLoc.x + x;
-    let newY = this._STATE.cameraMapLoc.y + y;
-    if (newX < 0 || newX > this._STATE.curMap.getXDim() - 1) { return; }
-    if (newY < 0 || newY > this._STATE.curMap.getYDim() - 1) { return; }
+    let newX = this._STATE.cameraMapLoc.x + dx;
+    let newY = this._STATE.cameraMapLoc.y + dy;
+    if (newX < 0 || newX > (this._STATE.this._STATE.curMapId.getXDim() - 1)) { return; }
+    if (newY < 0 || newY > (this._STATE.this._STATE.curMapId.getYDim() - 1)) { return; }
    this._STATE.cameraMapLoc.x = newX;
    this._STATE.cameraMapLoc.y = newY;
    this.render();
@@ -258,8 +276,8 @@ export class UIModePlay extends UIMode {
 // winning mode
 export class UIModeWin extends UIMode {
   render() {
-    this.display.drawText(1,1,"game win");
-    this.display.drawText(1,3,"you WIN!!");
+    this.display.drawText(1,1,"game win", Color.FG,Color.BG);
+    this.display.drawText(1,3,"you WIN!!", Color.FG,Color.BG);
     this.game.messageHandler.send("entering " + this.constructor.name);
   }
 }
@@ -267,8 +285,8 @@ export class UIModeWin extends UIMode {
 //losing mode
 export class UIModeLose extends UIMode {
   render() {
-    this.display.drawText(1,1,"game lose");
-    this.display.drawText(1,3,"you lose.");
+    this.display.drawText(1,1,"game lose",Color.FG,Color.BG);
+    this.display.drawText(1,3,"you lose.",Color.FG,Color.BG);
     this.game.messageHandler.send("entering " + this.constructor.name);
   }
 }

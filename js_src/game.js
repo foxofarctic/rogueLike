@@ -79,7 +79,7 @@ export let Game = {
     DATASTORE.GAME = this;
     console.log("datastore:");
     console.dir(DATASTORE);
-    this._mode.play.setupNewGame();
+    this._mode.play.startNewGame();
   },
 
   // initialize all mode objects

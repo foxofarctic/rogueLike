@@ -1,6 +1,6 @@
 // map class the tile grid the game is played on
 import ROT from 'rot-js';
-import * as U from './util.js';
+//import * as U from './util.js';
 import {TILES} from './tile.js';
 import {init2DArray, uniqueId} from './util.js';
 import {DATASTORE} from './datastore.js';
@@ -20,7 +20,7 @@ class Map{
 
   build() {
     this.tileGrid =
-    TILE_GRID_GENERATOR[this.state.mapType](this.state.xdim, this.state.ydim,t his.state.setupRngState);
+    TILE_GRID_GENERATOR[this.state.mapType](this.state.xdim, this.state.ydim, this.state.setupRngState);
   }
   getId(){
     return this.state.id;
@@ -52,6 +52,12 @@ class Map{
   }
   setRngState(newId){
     this.state.setupRngState = newId;
+  }
+  getTile(x,y) {
+    if ((x < 0) || (x >= this.state.xdim) || (y<0) || (y >= this.state.ydim)) {
+      return TILES.NULLTILE;
+    }
+    return this.tileGrid[x][y] || TILES.NULLTILE;
   }
   render(display, camera_map_x, camera_map_y){
     let cx = 0;
