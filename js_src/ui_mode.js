@@ -69,7 +69,7 @@ export class UIModePersistence extends UIMode{
       this.display.drawText(1, 8, "[Escape] - cancel/return to play", Color.FG, Color.BG);
     }
     if (this.game.hasSaved){
-      this.display.drawText(5, 4, "L - load saved game", Color.FG, Color.BG);
+      this.display.drawText(5, 5, "L - load saved game", Color.FG, Color.BG);
     }
   }
 
@@ -197,7 +197,7 @@ export class UIModePlay extends UIMode {
      return JSON.stringify(this._STATE);
   }
 
-  fromJSON(){
+  fromJSON(json){
     this._STATE = JSON.parse(json);
   }
 
@@ -212,6 +212,7 @@ export class UIModePlay extends UIMode {
     // this.display.drawText(1,3,"press any [Enter] to win");
     // this.display.drawText(1,5,"press any [Escape] to lose");
     this.game.messageHandler.send("entering " + this.constructor.name);
+    //console.dir(DATASTORE.MAPS[this._STATE.curMapId]);
     DATASTORE.MAPS[this._STATE.curMapId].render(this.display,
     this._STATE.cameraMapLoc.x,this._STATE.cameraMapLoc.y);
     this.avatarSym.render(this.display,this._STATE.cameraDisplayLoc.x,this._STATE.cameraDisplayLoc.y);
@@ -227,7 +228,7 @@ export class UIModePlay extends UIMode {
       else if (inputData.key == 'l') {
         this.game.switchMode('lose');
       }
-      else if (inputData.key == '=') {
+      else if (inputData.key == 'p') {
         this.game.switchMode('persistence');
       }
 
