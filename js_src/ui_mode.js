@@ -151,7 +151,7 @@ export class UIModePersistence extends UIMode{
   }
 }
 
-//start checking here
+
 // mode play
 export class UIModePlay extends UIMode {
   // constructor(gameRef) {
@@ -265,8 +265,8 @@ export class UIModePlay extends UIMode {
   moveCamera(dx,dy){
     let newX = this._STATE.cameraMapLoc.x + dx;
     let newY = this._STATE.cameraMapLoc.y + dy;
-    if (newX < 0 || newX > (this._STATE.this._STATE.curMapId.getXDim() - 1)) { return; }
-    if (newY < 0 || newY > (this._STATE.this._STATE.curMapId.getYDim() - 1)) { return; }
+    if (newX < 0 || newX > DATASTORE.MAPS[this._STATE.curMapId].getXDim() - 1) { return; }
+    if (newY < 0 || newY > DATASTORE.MAPS[this._STATE.curMapId].getYDim() - 1) { return; }
    this._STATE.cameraMapLoc.x = newX;
    this._STATE.cameraMapLoc.y = newY;
    this.render();
