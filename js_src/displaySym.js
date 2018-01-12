@@ -2,11 +2,11 @@ import {Color} from './color.js';
 
 export class DisplaySymbol{
 
-  constructor(chr, fg, bg){
-      this.chr = chr || ' ';
+  constructor(template){
+      this.chr = template.chr || ' ';
       // hex red,green,blue
-      this.fg = fg || Color.FG;
-      this.bg = bg || Color.BG;
+      this.fg = template.fg || Color.FG;
+      this.bg = template.bg || Color.BG;
   }
 
   render(display,console_x, console_y){

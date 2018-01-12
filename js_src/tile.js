@@ -4,14 +4,17 @@ import {DisplaySymbol} from './displaySym.js';
 
 class Tile extends DisplaySymbol{
 
-  constructor(name, chr, fg, bg){
-      super(chr,fg,bg);
-      this.name = name;
+  constructor(template){
+      super(template);
+      this.name = template.name;
+  }
+  isA(name){
+    return this.name == name;
   }
 }
 
 export let TILES = {
-    NULLTILE: new Tile('nullTile', '#'),
-    WALL: new Tile('wall', '#'),
-    FLOOR: new Tile('floor', '.')
+    NULLTILE: new Tile({name:'nullTile', chr:'#'}),
+    WALL: new Tile({name:'wall', chr:'#'}),
+    FLOOR: new Tile({name:'floor', chr:'.'})
 }

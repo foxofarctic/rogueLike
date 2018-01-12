@@ -1,9 +1,10 @@
-
+moveAvatar
 import ROT from 'rot-js';
 import {MapMaker} from './map.js';
 import {Color} from './color.js';
 import {DisplaySymbol} from './displaySym.js';
 import {DATASTORE,clearDataStore} from './datastore.js';
+import {EntityFactory} from './entities.js';
 
 // unspecified mode class
 class UIMode {
@@ -126,7 +127,6 @@ export class UIModePersistence extends UIMode{
     DATASTORE.GAME = this.game;
     this.game.fromJSON(savedState.GAME);
 
-
     // gets Id and deserializes it to retrieve map object and the makes map
     for (let savedMapId in savedState.MAPS) {
       MapMaker(JSON.parse(savedState.MAPS[savedMapId]));
@@ -176,7 +176,7 @@ export class UIModePlay extends UIMode {
     // this.cameraSymbol = new DisplaySymbol('@','#eb4');
     // this.game.messageHandler.clear();
     this.game.isPlaying = true;
-    this.avatarSym = new DisplaySymbol('@','#ee1');
+    //this.avatarSym = new DisplaySymbol('@','#ee1');
   }
 
   startNewGame() {
@@ -191,6 +191,11 @@ export class UIModePlay extends UIMode {
       x: Math.round(this.display.getOptions().width/2),
       y: Math.round(this.display.getOptions().height/2)
     };
+
+    //DisplaySymbol({'name': 'avatar', 'chr':'@', 'fg' '#eb4'});
+    let a = EntityFactory.create('avatar');
+    this.state.avatarId = a.getId();
+    m.addEntityAtRandomPosition(a);
   }
 
   toJSON(){
@@ -215,7 +220,7 @@ export class UIModePlay extends UIMode {
     //console.dir(DATASTORE.MAPS[this._STATE.curMapId]);
     DATASTORE.MAPS[this._STATE.curMapId].render(this.display,
     this._STATE.cameraMapLoc.x,this._STATE.cameraMapLoc.y);
-    this.avatarSym.render(this.display,this._STATE.cameraDisplayLoc.x,this._STATE.cameraDisplayLoc.y);
+    //this.avatarSym.render(this.display,this._STATE.cameraDisplayLoc.x,this._STATE.cameraDisplayLoc.y);
   }
 
   handleInput(inputType,inputData) {
@@ -234,43 +239,54 @@ export class UIModePlay extends UIMode {
 
       // navigation (keeping in mind that top left is 0,0, so positive y moves you down)
       else if (inputData.key == '1') {
-        this.moveCamera(-1,1);
+        this.moveAvatar(-1,1);
       }
       else if (inputData.key == '2') {
-        this.moveCamera(0,1);
+        this.moveAvatar(0,1);
       }
       else if (inputData.key == '3') {
-        this.moveCamera(1,1);
+        this.moveAvatar(1,1);
       }
       else if (inputData.key == '4') {
-        this.moveCamera(-1,0);
+        this.moveAvatar(-1,0);
       }
       else if (inputData.key == '5') {
-        this.moveCamera(0,0);
+        this.moveAvatar(0,0);
       }
       else if (inputData.key == '6') {
-        this.moveCamera(1,0);
+        this.moveAvatar(1,0);
       }
       else if (inputData.key == '7') {
-        this.moveCamera(-1,-1);
+        this.moveAvatar(-1,-1);
       }
       else if (inputData.key == '8') {
-        this.moveCamera(0,-1);
+        this.moveAvatar(0,-1);
       }
       else if (inputData.key == '9') {
-        this.moveCamera(1,-1);
+        this.moveAvatar(1,-1);
       }
     }
   }
 
-  moveCamera(dx,dy){
-    let newX = this._STATE.cameraMapLoc.x + dx;
-    let newY = this._STATE.cameraMapLoc.y + dy;
-    if (newX < 0 || newX > DATASTORE.MAPS[this._STATE.curMapId].getXDim() - 1) { return; }
-    if (newY < 0 || newY > DATASTORE.MAPS[this._STATE.curMapId].getYDim() - 1) { return; }
-   this._STATE.cameraMapLoc.x = newX;
-   this._STATE.cameraMapLoc.y = newY;
-   this.render();
+  moveAvatar(dx,dy){
+  //   let newX = this._STATE.cameraMapLoc.x + dx;
+  //   let newY = this._STATE.cameraMapLoc.y + dy;
+  //   if (newX < 0 || newX > DATASTORE.MAPS[this._STATE.curMapId].getXDim() - 1) { return; }
+  //   if (newY < 0 || newY > DATASTORE.MAPS[this._STATE.curMapId].getYDim() - 1) { return; }
+  //  this._STATE.cameraMapLoc.x = newX;
+  //  this._STATE.cameraMapLoc.y = newY;
+  //  this.render();
+    this.getAvatar().moveBy(dx,dy);
+    moveCameraToAvatar();
+  }
+
+  moveCameraToAvatar(){
+    this._STATE.cameraMapLoc.x = this.getAvatar.getX();
+    this._STATE.cameraMapLoc.y = this.getAvatar.getY();
+  }
+
+  getAvatar(){
+    return DATASTORE.ENTITIES[this.state.avatarId];
   }
 }
 
