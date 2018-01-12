@@ -29,11 +29,17 @@ export class Entity extends DisplaySymbol {
   setId(newInfo){ this.state.id = newInfo;}
 
   moveBy(dx,dy) {
-    this.state.x *= dx;
-    this.state.y *= dy;
-    this.state.x += dx*1;
-    this.state.y += dy*1;
-    this.getMap().updateEntityPosition(this,this.state.x,);
+    let newX = this.state.x*1 + dx*1;
+    let newY = this.state.y*1 + dy*1;
+
+  // check validity
+    if(this.getMap().isPositionOpen(newX,newY)){
+        this.state.x = newX;
+        this.state.y = newY;
+        this.getMap().updateEntityPosition(this,this.state.x,);
+        return true;
+     }
+    return false
   }
   toJSON(){
     return JSON.stringify(this.state)

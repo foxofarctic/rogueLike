@@ -69,10 +69,17 @@ class Map{
     let x = Math.trunc(ROT.RNG.getUniform()*this.state.xdim);
     let y = Math.trunc(ROT.RNG.getUniform()*this.state.ydim);
     // check openness
-    if ( this.tileGrid[x][y].isA('floor')){
-      return `${X},${Y}`;
+    if ( this.isPositionOpen(x,y)){
+      return `${x},${y}`;
     }
     return this.getRandomOpenPosition();
+  }
+
+  isPositionOpen(){
+    if ( this.tileGrid[x][y].isA('floor')){
+      return true;
+    }
+    return false;
   }
 
   render(display, camera_map_x, camera_map_y){
