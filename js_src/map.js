@@ -75,7 +75,9 @@ class Map{
     return this.getRandomOpenPosition();
   }
 
-  isPositionOpen(){
+  isPositionOpen(x,y){
+    console.log(x);
+    console.log(y);
     if ( this.tileGrid[x][y].isA('floor')){
       return true;
     }
@@ -124,27 +126,51 @@ class Map{
 
 let TILE_GRID_GENERATOR = {
   'basic caves': function(xdim,ydim,rngState) {
-    let tg = init2DArray(xdim,ydim,TILES.NULLTILE);
-    let gen = new ROT.Map.Cellular(xdim, ydim, { connected: true });
-    let origRngState = ROT.RNG.getState();
-    ROT.RNG.setSTate(rngState);
-
-    gen.randomize(.5);
-    gen.create();
-    gen.create();
-    gen.create();
-    gen.create();
-    gen.create();
-    gen.connect(function(x,y,isWall) {
-        tg[x][y] = (isWall || x==0 || y==0 || x==xdim-1 || y==ydim-1) ? TILES.WALL : TILES.FLOOR;
-      });
-      Rot.rng.setState(origRngState);
-    return tg;
-  }
+  //   let tg = init2DArray(xdim,ydim,TILES.NULLTILE);
+  //   let gen = new ROT.Map.Cellular(xdim, ydim, { connected: true });
+  //   let origRngState = ROT.RNG.getState();
+  //   ROT.RNG.setSTate(rngState);
+  //
+  //   gen.randomize(.5);
+  //   gen.create();
+  //   gen.create();
+  //   gen.create();
+  //   gen.create();
+  //   gen.create();
+  //   gen.connect(function(x,y,isWall) {
+  //       tg[x][y] = (isWall || x==0 || y==0 || x==xdim-1 || y==ydim-1) ? TILES.WALL : TILES.FLOOR;
+  //     });
+  //     Rot.rng.setState(origRngState);
+  //   return tg;
+  // }
+  let origRngState = ROT.RNG.getState();
+   ROT.RNG.setState(rngState);
+   let tg = init2DArray(xdim,ydim,TILES.NULLTILE);
+   let gen = new ROT.Map.Cellular(xdim, ydim, { connected: true });
+   gen.randomize(.49);
+   for(let i=3;i>=0;i--) {
+     gen.create();
+     // set the boundary to all wall each pass
+     for (let x=0;x<xdim;x++) {
+       for (let y=0;y<ydim;y++) {
+         if (x<=1 || y<=1 || x>=xdim-2 || y>=ydim-2) {
+           gen.set(x,y,1);
+         }
+       }
+     }
+   }
+   gen.connect(function(x,y,isWall) {
+     tg[x][y] = (isWall || x==0 || y==0 || x==xdim-1 || y==ydim-1) ? TILES.WALL : TILES.FLOOR;
+   });
+   ROT.RNG.setState(origRngState);
+   return tg;
+ }
 }
 
 // creates maps
 export function MapMaker(mapWidth, mapHeight) {
+  console.log("MapWidth" + mapWidth);
+  console.log("MapH " + mapHeight);
   let m = new Map(mapWidth, mapHeight);
   DATASTORE.MAPS[m.getId()] = m;
   return m;

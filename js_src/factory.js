@@ -4,7 +4,7 @@ import {DATASTORE} from './datastore.js';
 export class Factory{
   constructor(productClass, datastoreNamespace){
     this.productClass = productClass;
-    this.datastorNamespace = datastorNamespace;
+    this.datastoreNamespace = datastoreNamespace;
     this.knownTemplates = {};
   }
 

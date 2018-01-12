@@ -1,4 +1,4 @@
-moveAvatar
+
 import ROT from 'rot-js';
 import {MapMaker} from './map.js';
 import {Color} from './color.js';
@@ -181,7 +181,7 @@ export class UIModePlay extends UIMode {
 
   startNewGame() {
     this._STATE = {};
-    let m = MapMaker({xdim:60,ydim:20});
+    let m = MapMaker(60,20);
     this._STATE.curMapId = m.getId();
     this._STATE.cameraMapLoc = {
       x: Math.round(m.getXDim()/2),
@@ -194,7 +194,7 @@ export class UIModePlay extends UIMode {
 
     //DisplaySymbol({'name': 'avatar', 'chr':'@', 'fg' '#eb4'});
     let a = EntityFactory.create('avatar');
-    this.state.avatarId = a.getId();
+    this._STATE.avatarId = a.getId();
     m.addEntityAtRandomPosition(a);
   }
 
