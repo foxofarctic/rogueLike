@@ -16,7 +16,8 @@ class Map{
     this.state.setupRngState = ROT.RNG.getState();
     this.state.id = uniqueId('map-'+ this.state.mapType);
     this.state.entityIdToMapPos = {};
-    this.state.mapPosToEntityIdTo = {};
+    this.state.mapPosToEntityId = {};
+    this.build();
   }
 
   build() {
@@ -43,11 +44,11 @@ class Map{
     return this.tileGrid[x][y] || TILES.NULLTILE;
   }
 
-  addEntityAt(ent, max, mapy){
+  addEntityAt(ent, mapx, mapy){
     let pos =  `${mapx},${mapy}`;
-    this.state.entityIdToMapPos[ent.getId()] = `${X},${y}`;
+    this.state.entityIdToMapPos[ent.getId()] = pos;
     this.state.mapPosToEntityId[pos] = ent.getId();
-    ent.setMapiId(this.getId());
+    ent.setMapId(this.getId());
     ent.setX(mapx);
     ent.setY(mapy);
   }
@@ -55,7 +56,7 @@ class Map{
   updateEntityPosition(ent,newMapX,newMapY){
     let oldPos = this.state.entityIdToMapPos[ent.getId()];
     delete this.state.mapPosToEntityId[oldPos] ;
-    this.state.entityIdToEntityId[`${newMapX},${newMapY}`]= ent.getId();
+    this.state.mapPosToEntityId[`${newMapX},${newMapY}`]= ent.getId();
     this.state.entityIdToMapPos[ent.getId()] = `${newMapX},${newMapY}`;
   }
 
@@ -98,7 +99,7 @@ class Map{
         //console.log("inner");
         let pos = `${xi},${yi}`;
         if(this.state.mapPosToEntityId[pos]){
-          DATASTORE.ENTITIES[this.state.mapPosToEntityId][pos].render(display,cx,cy);
+          DATASTORE.ENTITIES[this.state.mapPosToEntityId[pos]].render(display,cx,cy);
     } else{
       this.getTile(xi,yi).render(display,cx,cy);
     }

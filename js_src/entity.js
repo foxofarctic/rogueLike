@@ -36,7 +36,7 @@ export class Entity extends DisplaySymbol {
     if(this.getMap().isPositionOpen(newX,newY)){
         this.state.x = newX;
         this.state.y = newY;
-        this.getMap().updateEntityPosition(this,this.state.x,);
+        this.getMap().updateEntityPosition(this,this.state.x,this.state.y);
         return true;
      }
     return false

@@ -1,7 +1,7 @@
 
 import ROT from 'rot-js';
 import * as U from './util.js';
-import {UIModeStart, UIModePlay, UIModeWin, UIModeLose, UIModePersistence} from './ui_mode.js';
+import {UIModeStart, UIModePlay, UIModeWin, UIModeLose, UIModePersistence, UIModeHelp} from './ui_mode.js';
 import {Message} from './message.js' ;
 import {DATASTORE, clearDataStore} from './datastore.js';
 
@@ -18,7 +18,8 @@ export let Game = {
     persistence: '',
     play: '',
     win: '',
-    lose: ''
+    lose: '',
+    help: ''
   },
   _curMode: '',
 
@@ -90,6 +91,7 @@ export let Game = {
     this._mode.play = new UIModePlay(this);
     this._mode.win = new UIModeWin(this);
     this._mode.lose = new UIModeLose(this);
+    this._mode.help = new UIModeHelp(this);
     //this.switchMode('start');
   },
 

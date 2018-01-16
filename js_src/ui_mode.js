@@ -185,6 +185,7 @@ export class UIModePlay extends UIMode {
   startNewGame() {
     this._STATE = {};
     let m = MapMaker(60,20);
+    //m.build();
     this._STATE.curMapId = m.getId();
     this._STATE.cameraMapLoc = {
       x: Math.round(m.getXDim()/2),
@@ -230,7 +231,7 @@ export class UIModePlay extends UIMode {
     // super.handleInput(inputType,inputData);
     if (inputType == 'keyup') {
       this.game.messageHandler.send(`you pressed the ${inputData.key} key`);
-      if (inputData.key == 'w') {
+      if (inputData.key == 'x') {
         this.game.switchMode('win');
       }
       else if (inputData.key == 'l') {
@@ -239,38 +240,36 @@ export class UIModePlay extends UIMode {
       else if (inputData.key == 'p') {
         this.game.switchMode('persistence');
       }
-
-      // navigation (keeping in mind that top left is 0,0, so positive y moves you down)
-      else if (inputData.key == '1') {
-        this.moveAvatar(-1,1);
-      }
-      else if (inputData.key == '2') {
-        this.moveAvatar(0,1);
-      }
-      else if (inputData.key == '3') {
-        this.moveAvatar(1,1);
-      }
-      else if (inputData.key == '4') {
-        this.moveAvatar(-1,0);
-      }
-      else if (inputData.key == '5') {
-        this.moveAvatar(0,0);
-      }
-      else if (inputData.key == '6') {
-        this.moveAvatar(1,0);
-      }
-      else if (inputData.key == '7') {
-        this.moveAvatar(-1,-1);
-      }
-      else if (inputData.key == '8') {
-        this.moveAvatar(0,-1);
-      }
-      else if (inputData.key == '9') {
-        this.moveAvatar(1,-1);
-      }
       else if (inputData.key == 'h' || inputData.key == 'H'){
         this.game.switchMode('help');
       }
+
+      // navigation (keeping in mind that top left is 0,0, so positive y moves you down)
+
+      else if (inputData.key == 's') {
+        this.moveAvatar(0,1);
+      }
+      // else if (inputData.key == '3') {
+      //   this.moveAvatar(1,1);
+      // }
+      else if (inputData.key == 'a') {
+        this.moveAvatar(-1,0);
+      }
+      // else if (inputData.key == '5') {
+      //   this.moveAvatar(0,0);
+      // }
+      else if (inputData.key == 'd') {
+        this.moveAvatar(1,0);
+      }
+      // else if (inputData.key == '7') {
+      //   this.moveAvatar(-1,-1);
+      // }
+      else if (inputData.key == 'w') {
+        this.moveAvatar(0,-1);
+      }
+      // else if (inputData.key == '9') {
+      //   this.moveAvatar(1,-1);
+      // }
     }
   }
 
@@ -283,36 +282,36 @@ export class UIModePlay extends UIMode {
   //  this._STATE.cameraMapLoc.y = newY;
   //  this.render();
     this.getAvatar().moveBy(dx,dy);
-    moveCameraToAvatar();
+    this.moveCameraToAvatar();
   }
 
   moveCameraToAvatar(){
-    this._STATE.cameraMapLoc.x = this.getAvatar.getX();
-    this._STATE.cameraMapLoc.y = this.getAvatar.getY();
+    this._STATE.cameraMapLoc.x = this.getAvatar().getX();
+    this._STATE.cameraMapLoc.y = this.getAvatar().getY();
   }
 
   getAvatar(){
-    return DATASTORE.ENTITIES[this.state.avatarId];
+    return DATASTORE.ENTITIES[this._STATE.avatarId];
   }
 }
 
 export class UIModeHelp extends UIMode{
   render() {
     this.display.drawText(1, 1, "Help Screen", Color.FG, Color.BG);
-    this.display.drawText(1, 3, "press escape to return to play", Color.FG, Color.BG);
+    this.display.drawText(1, 3, "press h to return to play", Color.FG, Color.BG);
     this.display.drawText(1, 5, "w - move up", Color.FG, Color.BG);
-    this.display.drawText(1, 6, "s - move down", Color.FG, Color.BG);
-    this.display.drawText(1, 7, "d - move right", Color.FG, Color.BG);
-    this.display.drawText(1, 8, "a - move left", Color.FG, Color.BG);
+    this.display.drawText(1, 6, "a - move left", Color.FG, Color.BG);
+    this.display.drawText(1, 7, "s - move down", Color.FG, Color.BG);
+    this.display.drawText(1, 8, "d - move right", Color.FG, Color.BG);
     this.display.drawText(1, 9, "p - pause/ enter persistence mode", Color.FG, Color.BG);
     this.display.drawText(1, 10, "h - help screen", Color.FG, Color.BG);
-    
+
   }
-  
+
   handleInput(inputType,inputData) {
     // super.handleInput(inputType, inputData);
-    if (inputData.keyCode !== 0 && inputType == 'keyup') {
-      this.game.switchMode('persistence');
+    if (inputData.keyCode == 'h' || 'H') {
+      this.game.switchMode('play');
     }
   }
 
