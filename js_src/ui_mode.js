@@ -97,6 +97,9 @@ export class UIModePersistence extends UIMode{
           this.game.switchMode('play');
         }
       }
+      else if (inputData.key == 'h' || inputData.key == 'H'){
+        this.game.switchMode('help');
+      }
     }
   }
 
@@ -265,6 +268,9 @@ export class UIModePlay extends UIMode {
       else if (inputData.key == '9') {
         this.moveAvatar(1,-1);
       }
+      else if (inputData.key == 'h' || inputData.key == 'H'){
+        this.game.switchMode('help');
+      }
     }
   }
 
@@ -288,6 +294,28 @@ export class UIModePlay extends UIMode {
   getAvatar(){
     return DATASTORE.ENTITIES[this.state.avatarId];
   }
+}
+
+export class UIModeHelp extends UIMode{
+  render() {
+    this.display.drawText(1, 1, "Help Screen", Color.FG, Color.BG);
+    this.display.drawText(1, 3, "press escape to return to play", Color.FG, Color.BG);
+    this.display.drawText(1, 5, "w - move up", Color.FG, Color.BG);
+    this.display.drawText(1, 6, "s - move down", Color.FG, Color.BG);
+    this.display.drawText(1, 7, "d - move right", Color.FG, Color.BG);
+    this.display.drawText(1, 8, "a - move left", Color.FG, Color.BG);
+    this.display.drawText(1, 9, "p - pause/ enter persistence mode", Color.FG, Color.BG);
+    this.display.drawText(1, 10, "h - help screen", Color.FG, Color.BG);
+    
+  }
+  
+  handleInput(inputType,inputData) {
+    // super.handleInput(inputType, inputData);
+    if (inputData.keyCode !== 0 && inputType == 'keyup') {
+      this.game.switchMode('persistence');
+    }
+  }
+
 }
 
 // winning mode
