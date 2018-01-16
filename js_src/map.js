@@ -15,50 +15,75 @@ class Map{
     this.state.mapType = 'basic caves' ;
     this.state.setupRngState = ROT.RNG.getState();
     this.state.id = uniqueId('map-'+ this.state.mapType);
-    console.dir(this);
+    this.state.entityIdToMapPos = {};
+    this.state.mapPosToEntityIdTo = {};
   }
 
   build() {
     this.tileGrid =
     TILE_GRID_GENERATOR[this.state.mapType](this.state.xdim, this.state.ydim, this.state.setupRngState);
   }
-  getId(){
-    return this.state.id;
-  }
-  setId(newId){
-    this.state.id = newId;
-  }
+  getId(){  return this.state.id; }
+  setId(newId){ this.state.id = newId;}
 
-  getXDim(){
-    return this.state.xdim;
-  }
-  setXDim(newId){
-    this.state.xdim = newId;
-  }
-  getYDim(){
-    return this.state.ydim;
-  }
-  setYDim(newId){
-    this.state.ydim = newId;
-  }
-  getMapType(){
-    return this.state.mapType;
-  }
-  setMapType(newId){
-    this.state.mapType = newId;
-  }
-  getRngState(){
-    return this.state.setupRngState;
-  }
-  setRngState(newId){
-    this.state.setupRngState = newId;
-  }
+  getXDim(){return this.state.xdim; }
+  setXDim(newId){ this.state.xdim = newId; }
+  getYDim(){ return this.state.ydim; }
+  setYDim(newId){ this.state.ydim = newId; }
+  getMapType(){ return this.state.mapType; }
+  setMapType(newId){ this.state.mapType = newId; }
+  getRngState(){ return this.state.setupRngState; }
+  setRngState(newId){ this.state.setupRngState = newId;}
+
+
   getTile(x,y) {
     if ((x < 0) || (x >= this.state.xdim) || (y<0) || (y >= this.state.ydim)) {
       return TILES.NULLTILE;
     }
     return this.tileGrid[x][y] || TILES.NULLTILE;
   }
+
+  addEntityAt(ent, max, mapy){
+    let pos =  `${mapx},${mapy}`;
+    this.state.entityIdToMapPos[ent.getId()] = `${X},${y}`;
+    this.state.mapPosToEntityId[pos] = ent.getId();
+    ent.setMapiId(this.getId());
+    ent.setX(mapx);
+    ent.setY(mapy);
+  }
+
+  updateEntityPosition(ent,newMapX,newMapY){
+    let oldPos = this.state.entityIdToMapPos[ent.getId()];
+    delete this.state.mapPosToEntityId[oldPos] ;
+    this.state.entityIdToEntityId[`${newMapX},${newMapY}`]= ent.getId();
+    this.state.entityIdToMapPos[ent.getId()] = `${newMapX},${newMapY}`;
+  }
+
+  addEntityAtRandomPosition(ent) {
+      let openPos = this.getRandomOpenPosition();
+      let p = openPos.split(',');
+      this.addEntityAt(ent,p[0],p[1]);
+  }
+
+  getRandomOpenPosition(){
+    let x = Math.trunc(ROT.RNG.getUniform()*this.state.xdim);
+    let y = Math.trunc(ROT.RNG.getUniform()*this.state.ydim);
+    // check openness
+    if ( this.isPositionOpen(x,y)){
+      return `${x},${y}`;
+    }
+    return this.getRandomOpenPosition();
+  }
+
+  isPositionOpen(x,y){
+    console.log(x);
+    console.log(y);
+    if ( this.tileGrid[x][y].isA('floor')){
+      return true;
+    }
+    return false;
+  }
+
   render(display, camera_map_x, camera_map_y){
     let cx = 0;
     let cy = 0;
@@ -71,7 +96,12 @@ class Map{
       //console.log("outer");
       for(let yi=ystart; yi < yend; yi++){
         //console.log("inner");
-        this.getTile(xi,yi).render(display,cx,cy);
+        let pos = `${xi},${yi}`;
+        if(this.state.mapPosToEntityId[pos]){
+          DATASTORE.ENTITIES[this.state.mapPosToEntityId][pos].render(display,cx,cy);
+    } else{
+      this.getTile(xi,yi).render(display,cx,cy);
+    }
         cy++;
       }
       cx++;
@@ -96,27 +126,51 @@ class Map{
 
 let TILE_GRID_GENERATOR = {
   'basic caves': function(xdim,ydim,rngState) {
-    let tg = init2DArray(xdim,ydim,TILES.NULLTILE);
-    let gen = new ROT.Map.Cellular(xdim, ydim, { connected: true });
-    let origRngState = ROT.RNG.getState();
-    ROT.RNG.setSTate(rngState);
-
-    gen.randomize(.5);
-    gen.create();
-    gen.create();
-    gen.create();
-    gen.create();
-    gen.create();
-    gen.connect(function(x,y,isWall) {
-        tg[x][y] = (isWall || x==0 || y==0 || x==xdim-1 || y==ydim-1) ? TILES.WALL : TILES.FLOOR;
-      });
-      Rot.rng.setState(origRngState);
-    return tg;
-  }
+  //   let tg = init2DArray(xdim,ydim,TILES.NULLTILE);
+  //   let gen = new ROT.Map.Cellular(xdim, ydim, { connected: true });
+  //   let origRngState = ROT.RNG.getState();
+  //   ROT.RNG.setSTate(rngState);
+  //
+  //   gen.randomize(.5);
+  //   gen.create();
+  //   gen.create();
+  //   gen.create();
+  //   gen.create();
+  //   gen.create();
+  //   gen.connect(function(x,y,isWall) {
+  //       tg[x][y] = (isWall || x==0 || y==0 || x==xdim-1 || y==ydim-1) ? TILES.WALL : TILES.FLOOR;
+  //     });
+  //     Rot.rng.setState(origRngState);
+  //   return tg;
+  // }
+  let origRngState = ROT.RNG.getState();
+   ROT.RNG.setState(rngState);
+   let tg = init2DArray(xdim,ydim,TILES.NULLTILE);
+   let gen = new ROT.Map.Cellular(xdim, ydim, { connected: true });
+   gen.randomize(.49);
+   for(let i=3;i>=0;i--) {
+     gen.create();
+     // set the boundary to all wall each pass
+     for (let x=0;x<xdim;x++) {
+       for (let y=0;y<ydim;y++) {
+         if (x<=1 || y<=1 || x>=xdim-2 || y>=ydim-2) {
+           gen.set(x,y,1);
+         }
+       }
+     }
+   }
+   gen.connect(function(x,y,isWall) {
+     tg[x][y] = (isWall || x==0 || y==0 || x==xdim-1 || y==ydim-1) ? TILES.WALL : TILES.FLOOR;
+   });
+   ROT.RNG.setState(origRngState);
+   return tg;
+ }
 }
 
 // creates maps
 export function MapMaker(mapWidth, mapHeight) {
+  console.log("MapWidth" + mapWidth);
+  console.log("MapH " + mapHeight);
   let m = new Map(mapWidth, mapHeight);
   DATASTORE.MAPS[m.getId()] = m;
   return m;
