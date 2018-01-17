@@ -1,10 +1,12 @@
 //encapsulate the handling of mixins
-import {DisplaySymbol} from './displaySym.js'
-import * as E from './mixinEntities.js'
+import {DisplaySymbol} from './displaySym.js';
+import * as E from './mixinEntities.js';
 
 export class MixableSymbol extends DisplaySymbol {
   constructor(template) {
     super(template);
+    console.log("constructing mixins");
+    console.dir(template);
     if (! this.state){this.state = {};}
 
     this.mixins = [];
@@ -13,6 +15,7 @@ export class MixableSymbol extends DisplaySymbol {
       for (let mi = 0; mi < template.mixinNames.length; mi++){
         this.mixins.push(E[template.mixinNames[mi]]);
         this.mixinTracker[template.mixinNames[mi]] = true;
+        console.log(template.mixinNames[mi]);
       }
     }
 

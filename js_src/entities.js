@@ -9,6 +9,6 @@ EntityFactory.learn({
   'name': 'avatar',
   'chr': '@',
   'fg': '#eb4',
-  'mixinName': ['TimeTracker','WalkerCorporeal','PlayerMessage','HitPoints'],
+  'mixinNames': ['TimeTracker','WalkerCorporeal','PlayerMessage','HitPoints'],
   maxHp: 10
 });

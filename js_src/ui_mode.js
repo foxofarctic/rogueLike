@@ -223,6 +223,7 @@ export class UIModePlay extends UIMode {
   renderAvatar(display) {
     display.clear();
     display.drawText(0, 0, "Avatar");
+    console.log(this.getAvatar());
     display.drawText(0, 2, "time: " + this.getAvatar().getTime());
     display.drawText(0, 3, "location: " + this.getAvatar().getX() + ", " + this.getAvatar().getY());
     display.drawText(0, 4, "Max HP: " + this.getAvatar().getMaxHp());
