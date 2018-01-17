@@ -250,25 +250,25 @@ export class UIModePlay extends UIMode {
       // navigation (keeping in mind that top left is 0,0, so positive y moves you down)
 
       else if (inputData.key == 's') {
-        this.moveAvatar(0,1);
+        this.getAvatar().tryWalk(0,1);
       }
       // else if (inputData.key == '3') {
       //   this.moveAvatar(1,1);
       // }
       else if (inputData.key == 'a') {
-        this.moveAvatar(-1,0);
+        this.getAvatar().tryWalk(-1,0);
       }
       // else if (inputData.key == '5') {
       //   this.moveAvatar(0,0);
       // }
       else if (inputData.key == 'd') {
-        this.moveAvatar(1,0);
+        this.getAvatar().tryWalk(1,0);
       }
       // else if (inputData.key == '7') {
       //   this.moveAvatar(-1,-1);
       // }
       else if (inputData.key == 'w') {
-        this.moveAvatar(0,-1);
+        this.getAvatar().tryWalk(0,-1);
       }
       // else if (inputData.key == '9') {
       //   this.moveAvatar(1,-1);

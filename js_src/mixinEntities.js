@@ -98,10 +98,11 @@ export let WalkerCorporeal = {
 
       let targetPositionInfo = this.getMap().getTargetPositionInfo(newX,newY);
       if (targetPositionInfo.entity){
+        console.log("entity");
         this.raiseMixinEvent('bumpEntity', {actor: this, target: targetPositionInfo.entity});
         return false;
       } else {
-        if(targetPositionInf.tile.isImpassable()){
+        if(targetPositionInfo.tile.isImpassable()){
           this.raisMixinEvent('wallBlocked',{reason:"there is a wall in the way"})
         } else{
           this.state.x = newX;
@@ -160,12 +161,16 @@ export let HitPoints = {
   LISTENERS: {
     'damaged': function(evtData) {
       //evtData.src
+      console.log("damaged again");
       this.loseHp(evtData.damageAmount);
       evtData.src.raiseMixinEvent('damages',
       {target: this,damageAmount:evtData.damageAmount});
+      console.log("hp "+ this.getHp());
+
       if (this.getHp() == 0){
         this.raiseMixinEvent('killedBy',{src:evtData.src});
         evtData.src.raiseMixinEvent('killedBy',{src:evtData.src});
+        console.log("destroy");
         this.destroy();
       }
     }
@@ -182,6 +187,7 @@ export let MeleeAttacker = {
     },
     initialize: function(template){
       this.state._MeleeAttacker.meleeDamage = template.meleeDamage || 1;
+      console.log("initialize MeleeAttacker");
     }
   },
   METHODS: {
@@ -192,9 +198,7 @@ export let MeleeAttacker = {
   LISTENERS: {
     'bumpEntity': function(evtData) {
       evtData.target.raiseMixinEvent('damaged',{src:this,damageAmount:this.getMeleeDamage()});
-      console.log("damaged");
       this.raiseMixinEvent('attacks', {actor:this,target:evtData.target});
-      console.log("attacked");
     }
   }
 };

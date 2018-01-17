@@ -96,10 +96,13 @@ class Map{
       entity: '',
       tile: this.getTile(x,y)
     };
-    let entId = this.state.mapPosToEntityId[`${newMapX},${newMapY}`];
+    let entId = this.state.mapPosToEntityId[`${x},${y}`];
     if (entId){
       info.entity = DATASTORE.ENTITIES[entId];
+      console.log(info.entity);
     }
+    console.log("targetPosition");
+
     return info;
   }
 

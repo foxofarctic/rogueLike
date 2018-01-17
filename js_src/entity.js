@@ -30,6 +30,7 @@ export class Entity extends MixableSymbol {
 
   destroy(){
     // remove from map remove from DATASTORE
+    console.log("destroy");
     this.getMap().extractEntity(this);
     delete DATASTORE[this.getId()];
   }

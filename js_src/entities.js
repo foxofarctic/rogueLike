@@ -11,6 +11,7 @@ EntityFactory.learn({
   'fg': '#eb4',
   'mixinNames': ['TimeTracker','WalkerCorporeal','PlayerMessage','HitPoints','MeleeAttacker'],
   'maxHp': 10
+
 });
 
 EntityFactory.learn({
@@ -19,4 +20,5 @@ EntityFactory.learn({
   'fg': '#3d5',
   'mixinNames': ['HitPoints'],
   'maxHp': 3
+
 });
