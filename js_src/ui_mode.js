@@ -22,6 +22,9 @@ class UIMode {
   }
   render() { console.log(`UIMode render - ${this.constructor.name}`);
   }
+  renderAvatar(display){
+    display.clear();
+  }
   handleInput(inputType,inputData) {
     console.log(`UIMode handleInput - ${this.constructor.name}`);
     UIMode.dumpInput(inputType,inputData);
@@ -46,10 +49,6 @@ export class UIModeStart extends UIMode {
   render() {
     this.display.drawText(1, 1, "game start", Color.FG, Color.BG);
     this.display.drawText(1, 3, "press any key to play", Color.FG, Color.BG);
-  }
-
-  renderAvatar(display){
-    display.clear();
   }
 
   handleInput(inputType,inputData) {
@@ -80,10 +79,6 @@ export class UIModePersistence extends UIMode{
     if (this.game.hasSaved){
       this.display.drawText(5, 5, "L - load saved game", Color.FG, Color.BG);
     }
-  }
-
-  renderAvatar(display){
-    display.clear();
   }
 
   handleInput(inputType,inputData) {
@@ -191,8 +186,13 @@ export class UIModePlay extends UIMode {
 
     //DisplaySymbol({'name': 'avatar', 'chr':'@', 'fg' '#eb4'});
     let a = EntityFactory.create('avatar');
+    let b = EntityFactory.create('moss');
     this._STATE.avatarId = a.getId();
     m.addEntityAtRandomPosition(a);
+
+    for(let mossCount = 0; mossCount<10; mossCount++){
+      m.addEntityAtRandomPosition(EntityFactory.create('moss'));
+    }
   }
 
   toJSON(){
@@ -298,6 +298,7 @@ export class UIModePlay extends UIMode {
 
 //*****************************************
 export class UIModeHelp extends UIMode{
+
   render() {
     this.display.drawText(1, 1, "Help Screen", Color.FG, Color.BG);
     this.display.drawText(1, 3, "press h to return to play", Color.FG, Color.BG);
@@ -308,10 +309,6 @@ export class UIModeHelp extends UIMode{
     this.display.drawText(1, 9, "p - pause/ enter persistence mode", Color.FG, Color.BG);
     this.display.drawText(1, 10, "h - help screen", Color.FG, Color.BG);
 
-  }
-
-  renderAvatar(display){
-    display.clear();
   }
 
   handleInput(inputType,inputData) {
@@ -331,10 +328,6 @@ export class UIModeWin extends UIMode {
     this.display.drawText(1,3,"you WIN!!", Color.FG,Color.BG);
     this.game.messageHandler.send("entering " + this.constructor.name);
   }
-
-  renderAvatar(display){
-    display.clear();
-  }
 }
 
 
@@ -345,9 +338,5 @@ export class UIModeLose extends UIMode {
     this.display.drawText(1,1,"game lose",Color.FG,Color.BG);
     this.display.drawText(1,3,"you lose.",Color.FG,Color.BG);
     this.game.messageHandler.send("entering " + this.constructor.name);
-  }
-
-  renderAvatar(display){
-    display.clear();
   }
 }

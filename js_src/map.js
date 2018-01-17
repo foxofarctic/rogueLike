@@ -44,6 +44,12 @@ class Map{
     return this.tileGrid[x][y] || TILES.NULLTILE;
   }
 
+  extractEntity(ent){
+    delete this.state.MapPosToEntityId[this.state.entityIdToMapPos[ent.getId()]];
+    delete this.state.entityIdToMapPos[ent.getId()];
+    return ent;
+  }
+
   addEntityAt(ent, mapx, mapy){
     let pos =  `${mapx},${mapy}`;
     this.state.entityIdToMapPos[ent.getId()] = pos;
@@ -83,6 +89,18 @@ class Map{
       return true;
     }
     return false;
+  }
+
+  getTargetPositionInfo(x,y){
+    let info = {
+      entity: '',
+      tile: this.getTile(x,y)
+    };
+    let entId = this.state.mapPosToEntityId[`${newMapX},${newMapY}`];
+    if (entId){
+      info.entity = DATASTORE.ENTITIES[entId];
+    }
+    return info;
   }
 
   render(display, camera_map_x, camera_map_y){

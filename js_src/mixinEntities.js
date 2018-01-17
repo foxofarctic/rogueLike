@@ -39,6 +39,18 @@ export let PlayerMessage = {
   LISTENERS: {
     'wallBlocked': function(evtData) {
       Message.send('can\'t move there because ' + evtData.reason);
+    },
+    'attacks': function(evtData){
+      Message.send(this.getName()+" attacks "+evtData.target.getName());
+    },
+    'damages': function(evtData){
+      Message.send(this.getName()+" deals "+evtData.damageAmount + " damage to" + evtData.target.getName());
+    },
+    'kills': function(evtData){
+      Message.send(this.getName()+" kills " + evtData.target.getName());
+    },
+    'killedBy': function(evtData){
+      Message.send(evtData.target.getName()+ " was killed by " + this.getName());
     }
   }
 };
@@ -84,16 +96,23 @@ export let WalkerCorporeal = {
       let newX = this.state.x*1 + dx*1;
       let newY = this.state.y*1 + dy*1;
 
-      if (this.getMap().isPositionOpen(newX, newY)) {
-        this.state.x = newX;
-        this.state.y = newY;
-        this.getMap().updateEntityPosition(this, this.state.x, this.state.y);
+      let targetPositionInfo = this.getMap().getTargetPositionInfo(newX,newY);
+      if (targetPositionInfo.entity){
+        this.raiseMixinEvent('bumpEntity', {actor: this, target: targetPositionInfo.entity});
+        return false;
+      } else {
+        if(targetPositionInf.tile.isImpassable()){
+          this.raisMixinEvent('wallBlocked',{reason:"there is a wall in the way"})
+        } else{
+          this.state.x = newX;
+          this.state.y = newY;
+          this.getMap().updateEntityPosition(this, this.state.x, this.state.y);
 
-        this.raiseMixinEvent('turnTaken', {timeUsed: 1});
+          this.raiseMixinEvent('turnTaken', {timeUsed: 1});
 
-        return true;
+          return true;
+        }
       }
-      this.raiseMixinEvent('wallBlocked', {reason: 'there\'s something in the way'})
       return false;
     }
   }
@@ -139,7 +158,43 @@ export let HitPoints = {
     }
   },
   LISTENERS: {
-    'evtLabel': function(evtData) {
+    'damaged': function(evtData) {
+      //evtData.src
+      this.loseHp(evtData.damageAmount);
+      evtData.src.raiseMixinEvent('damages',
+      {target: this,damageAmount:evtData.damageAmount});
+      if (this.getHp() == 0){
+        this.raiseMixinEvent('killedBy',{src:evtData.src});
+        evtData.src.raiseMixinEvent('killedBy',{src:evtData.src});
+        this.destroy();
+      }
+    }
+  }
+};
+
+export let MeleeAttacker = {
+  META:{
+    mixinName: 'MeleeAttacker',
+    mixinGroupName: 'MeleeAttacker',
+    stateNameSpace: '_MeleeAttacker',
+    stateModel: {
+        meleeDamage: 1
+    },
+    initialize: function(template){
+      this.state._MeleeAttacker.meleeDamage = template.meleeDamage || 1;
+    }
+  },
+  METHODS: {
+    getMeleeDamage: function(){return this.state._MeleeAttacker.meleeDamage; },
+    setMeleeDamage: function(amt){ this.state._MeleeAttacker.meleeDamage = amt; },
+
+  },
+  LISTENERS: {
+    'bumpEntity': function(evtData) {
+      evtData.target.raiseMixinEvent('damaged',{src:this,damageAmount:this.getMeleeDamage()});
+      console.log("damaged");
+      this.raiseMixinEvent('attacks', {actor:this,target:evtData.target});
+      console.log("attacked");
     }
   }
 };

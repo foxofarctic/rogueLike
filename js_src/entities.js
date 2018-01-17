@@ -9,6 +9,14 @@ EntityFactory.learn({
   'name': 'avatar',
   'chr': '@',
   'fg': '#eb4',
-  'mixinNames': ['TimeTracker','WalkerCorporeal','PlayerMessage','HitPoints'],
-  maxHp: 10
+  'mixinNames': ['TimeTracker','WalkerCorporeal','PlayerMessage','HitPoints','MeleeAttacker'],
+  'maxHp': 10
+});
+
+EntityFactory.learn({
+  'name': 'moss',
+  'chr': '#',
+  'fg': '#3d5',
+  'mixinNames': ['HitPoints'],
+  'maxHp': 3
 });

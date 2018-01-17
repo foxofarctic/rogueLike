@@ -81,6 +81,7 @@ export let Game = {
     console.log("datastore:");
     console.dir(DATASTORE);
     this._mode.play.startNewGame();
+    //this.initTiming();
   },
 
   // initialize all mode objects
