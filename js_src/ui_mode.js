@@ -2,10 +2,11 @@
 import ROT from 'rot-js';
 import {MapMaker} from './map.js';
 import {Color} from './color.js';
-import {DisplaySymbol} from './displaySym.js';
+import {MixableSymbol} from './mixableSym.js';
 import {DATASTORE,clearDataStore} from './datastore.js';
 import {EntityFactory} from './entities.js';
 
+//*******************************
 // unspecified mode class
 class UIMode {
   constructor(gameRef) {
@@ -33,6 +34,8 @@ class UIMode {
   }
 }
 
+
+//********************************************
 // starting mode
 export class UIModeStart extends UIMode {
   enter() {
@@ -45,6 +48,10 @@ export class UIModeStart extends UIMode {
     this.display.drawText(1, 3, "press any key to play", Color.FG, Color.BG);
   }
 
+  renderAvatar(display){
+    display.clear();
+  }
+
   handleInput(inputType,inputData) {
     // super.handleInput(inputType, inputData);
     if (inputData.keyCode !== 0 && inputType == 'keyup') {
@@ -53,6 +60,7 @@ export class UIModeStart extends UIMode {
   }
 }
 
+//**********************************************
 // persistence mode for Save, Load, New Game
 export class UIModePersistence extends UIMode{
   enter(){
@@ -72,6 +80,10 @@ export class UIModePersistence extends UIMode{
     if (this.game.hasSaved){
       this.display.drawText(5, 5, "L - load saved game", Color.FG, Color.BG);
     }
+  }
+
+  renderAvatar(display){
+    display.clear();
   }
 
   handleInput(inputType,inputData) {
@@ -154,32 +166,13 @@ export class UIModePersistence extends UIMode{
   }
 }
 
-
+// **************************************
 // mode play
 export class UIModePlay extends UIMode {
-  // constructor(gameRef) {
-  //   super.enter();
-  //   this.state ={
-  //     mapId: '',
-  //     cameramapx: '',
-  //     cameramapy: ''
-  //   };
-  // }
 
   enter() {
     super.enter();
-    // if (! this.map){
-    //   //this.map = new Map(20,20);
-    //   let m = MapMaker(20,20);
-    //   this.state.mapId = m.getId
-    //   m.build();
-    // }
-    // this.camerax = 5;
-    // this.cameray = 8;
-    // this.cameraSymbol = new DisplaySymbol('@','#eb4');
-    // this.game.messageHandler.clear();
     this.game.isPlaying = true;
-    //this.avatarSym = new DisplaySymbol('@','#ee1');
   }
 
   startNewGame() {
@@ -225,6 +218,15 @@ export class UIModePlay extends UIMode {
     DATASTORE.MAPS[this._STATE.curMapId].render(this.display,
     this._STATE.cameraMapLoc.x,this._STATE.cameraMapLoc.y);
     //this.avatarSym.render(this.display,this._STATE.cameraDisplayLoc.x,this._STATE.cameraDisplayLoc.y);
+  }
+
+  renderAvatar(display) {
+    display.clear();
+    display.drawText(0, 0, "Avatar");
+    display.drawText(0, 2, "time: " + this.getAvatar().getTime());
+    display.drawText(0, 3, "location: " + this.getAvatar().getX() + ", " + this.getAvatar().getY());
+    display.drawText(0, 4, "Max HP: " + this.getAvatar().getMaxHp());
+    display.drawText(0, 5, "Current HP: " + this.getAvatar().getHp());
   }
 
   handleInput(inputType,inputData) {
@@ -274,15 +276,13 @@ export class UIModePlay extends UIMode {
   }
 
   moveAvatar(dx,dy){
-  //   let newX = this._STATE.cameraMapLoc.x + dx;
-  //   let newY = this._STATE.cameraMapLoc.y + dy;
-  //   if (newX < 0 || newX > DATASTORE.MAPS[this._STATE.curMapId].getXDim() - 1) { return; }
-  //   if (newY < 0 || newY > DATASTORE.MAPS[this._STATE.curMapId].getYDim() - 1) { return; }
-  //  this._STATE.cameraMapLoc.x = newX;
-  //  this._STATE.cameraMapLoc.y = newY;
-  //  this.render();
-    this.getAvatar().moveBy(dx,dy);
-    this.moveCameraToAvatar();
+    if (DATASTORE.ENTITIES[this._STATE.avatarId].moveBy(dx,dy)) {
+      DATASTORE.ENTITIES[this._STATE.avatarId].addTime(1);
+      this.moveCameraToAvatar();
+      //this.render();
+    } else {
+      this.game.messageHandler.send("you cannot move there");
+    }
   }
 
   moveCameraToAvatar(){
@@ -295,6 +295,7 @@ export class UIModePlay extends UIMode {
   }
 }
 
+//*****************************************
 export class UIModeHelp extends UIMode{
   render() {
     this.display.drawText(1, 1, "Help Screen", Color.FG, Color.BG);
@@ -308,6 +309,10 @@ export class UIModeHelp extends UIMode{
 
   }
 
+  renderAvatar(display){
+    display.clear();
+  }
+
   handleInput(inputType,inputData) {
     // super.handleInput(inputType, inputData);
     if (inputData.keyCode == 'h' || 'H') {
@@ -317,6 +322,7 @@ export class UIModeHelp extends UIMode{
 
 }
 
+//********************************************
 // winning mode
 export class UIModeWin extends UIMode {
   render() {
@@ -324,13 +330,23 @@ export class UIModeWin extends UIMode {
     this.display.drawText(1,3,"you WIN!!", Color.FG,Color.BG);
     this.game.messageHandler.send("entering " + this.constructor.name);
   }
+
+  renderAvatar(display){
+    display.clear();
+  }
 }
 
+
+//**********************************************
 //losing mode
 export class UIModeLose extends UIMode {
   render() {
     this.display.drawText(1,1,"game lose",Color.FG,Color.BG);
     this.display.drawText(1,3,"you lose.",Color.FG,Color.BG);
     this.game.messageHandler.send("entering " + this.constructor.name);
+  }
+
+  renderAvatar(display){
+    display.clear();
   }
 }

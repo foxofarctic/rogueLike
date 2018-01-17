@@ -120,10 +120,12 @@ export let Game = {
 
   renderDisplayAvatar: function() {
     let d = this._display.avatar.o;
-    d.clear();
-    for (let i = 0; i < 10; i++) {
-      d.drawText(5,i+5,"Avatar");
-    }
+    //d.clear();
+    this._curMode.renderAvatar(d);
+    // d.drawText(1,1,"Avatar");
+    // let a = this._mode.play.getAvatar();
+    // if (! a) { return; };
+    // d.drawText(3,2,"Turns: " + a.getTime());
   },
 
   renderMessage: function() {
