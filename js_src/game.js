@@ -4,6 +4,7 @@ import * as U from './util.js';
 import {UIModeStart, UIModePlay, UIModeWin, UIModeLose, UIModePersistence, UIModeHelp} from './ui_mode.js';
 import {Message} from './message.js' ;
 import {DATASTORE, clearDataStore} from './datastore.js';
+import {initTiming} from './timing.js';
 
 
 console.log('ROT is:');

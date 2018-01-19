@@ -9,7 +9,7 @@ EntityFactory.learn({
   'name': 'avatar',
   'chr': '@',
   'fg': '#eb4',
-  'mixinNames': ['TimeTracker','WalkerCorporeal','PlayerMessage','HitPoints','MeleeAttacker'],
+  'mixinNames': ['TimeTracker','WalkerCorporeal','PlayerMessage','HitPoints','MeleeAttacker','ActorPlayer'],
   'maxHp': 10
 
 });
@@ -22,3 +22,12 @@ EntityFactory.learn({
   'maxHp': 3
 
 });
+
+EntityFactory.learn({
+    'name': 'monster',
+    'chr': '&',
+    'fg': '#d63',
+    'maxHp': 50,
+    'mixInNames':['ActorWanderer','WalkerCorporeal','HitPoints']
+
+  });

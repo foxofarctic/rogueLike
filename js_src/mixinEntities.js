@@ -1,5 +1,9 @@
 //defines the various mixins that can be added to an Entity
 import {Message} from './message.js';
+import {SCHEDULER,TIME_ENGINE,initTiming} from'./timing.js';
+import {DATASTORE} from './datastore.js';
+import {Map} from './map.js';
+import {randomInt} from './util.js';
 
 let ExampleMixin = {
   META:{
@@ -103,7 +107,7 @@ export let WalkerCorporeal = {
         return false;
       } else {
         if(targetPositionInfo.tile.isImpassable()){
-          this.raisMixinEvent('wallBlocked',{reason:"there is a wall in the way"})
+          this.raiseMixinEvent('wallBlocked',{reason:"there is a wall in the way"})
         } else{
           this.state.x = newX;
           this.state.y = newY;
@@ -199,6 +203,119 @@ export let MeleeAttacker = {
     'bumpEntity': function(evtData) {
       evtData.target.raiseMixinEvent('damaged',{src:this,damageAmount:this.getMeleeDamage()});
       this.raiseMixinEvent('attacks', {actor:this,target:evtData.target});
+    }
+  }
+};
+
+//********************************
+export let ActorPlayer = {
+  META: {
+    mixInName:'ActorPlayer',
+    mixInGroupName: 'ActorPlayer',
+    stateNamespace: '_ActorPlayer',
+    stateModel: {
+      baseActionDuration: 1000,
+      actingState: false,
+      currentActionDuration: 1000
+    },
+
+    initialize: function(){
+      console.log("initialize Player Actor");
+      SCHEDULER.add(this,true,1)
+    }
+  },
+
+  METHODS: {
+    getBaseActionDuration: function () {
+      return this.state._ActorPlayer.baseActionDuration;
+    },
+    setBaseActionDuration: function (newValue) {
+      this.state._ActorPlayer.baseActionDuration = newValue;
+    },
+    getCurrentActionDuration: function () {
+      return this.state._ActorPlayer.currentActionDuration;
+    },
+      setCurrentActionDuration: function (newValue) {
+      this.state._ActorPlayer.currentActionDuration = newValue;
+    },
+    isActing: function(state) {
+      if (state !== undefined) {
+      this.state._ActorPlayer.actingState = state;
+      }
+      console.dir(this.state);
+      return this.state._ActorPlayer.actingState;
+    },
+
+
+    act: function(){
+      if (this.isActing()) {
+        return;
+      }
+      this.isActing(true);
+      TIME_ENGINE.lock();
+      this.isActing(false);
+      console.log("Player is Acting");
+    }
+  },
+
+  LISTENERS: {
+    'actionDone': function(evtData){
+      SCHEDULER.setDuration(this.getCurrentActionDuration());
+      this.setCurrentActionDuration(this.getBaseActionDuration()+randomInt(-5,5));
+      setTimeout(function(){ TIME_ENGINE.unlock();},1);
+      console.log("Player still working");
+    }
+  }
+};
+
+
+export let ActorWanderer = {
+  META: {
+    mixInName:'ActorWanderer',
+    mixInGroupName: 'ActorWanderer',
+    stateNamespace: '_ActorWanderer',
+    stateModel: {
+      baseActionDuration: 1000,
+      actingState: false,
+      currentActionDuration: 1000
+    },
+
+    initialize: function(template){
+      SCHEDULER.add(this,true,randomInt(2,this.getBaseActionDuration()));
+      this.state._ActorWanderer.baseActionDuration = template.wanderActionDuration || 1000;
+      this.state._ActorWanderer.currentActionDuration = this.state._ActorWanderer.baseActionDuration;
+    }
+  },
+
+  METHODS: {
+    getBaseActionDuration: function () {
+      return this.state._ActorWanderer.baseActionDuration;
+    },
+    setBaseActionDuration: function (newValue) {
+      this.state._ActorWanderer.baseActionDuration = newValue;
+    },
+    getCurrentActionDuration: function () {
+      return this.state._ActorWanderer.currentActionDuration;
+    },
+    setCurrentActionDuration: function (newValue) {
+      this.state._ActorWanderer.currentActionDuration = newValue;
+    },
+    act: function(){
+      TIME_ENGINE.lock();
+      let dx = randomInt(-1,1);
+      let dy = randomInt(-1,1);
+      this.raiseMixinEvent('walkAttempt',{'dx':dx, 'dy':dy});
+      SCHEDULER.setDuration(1000);
+      TIME_ENGINE.unlock();
+    }
+  },
+
+  LISTENERS: {
+    'actionDone': function(evtData){
+      SCHEDULER.setDuration(this.getCurrentActionDuration());
+      this.setCurrentActionDuration(this.getBaseActionDuration()+randomInt(-5,5));
+      setTimeout(function(){ TIME_ENGINE.unlock();},1);
+      console.log("Player still working");
     }
   }
 };

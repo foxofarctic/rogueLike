@@ -1,4 +1,5 @@
 import {DATASTORE} from './datastore.js';
+import ROT from 'rot-js';
 
 export function utilAlert() {
   document.write("this is a util function<br/>");
@@ -19,6 +20,13 @@ export function init2DArray(xdim,ydim,initialValue){
   }
   return a;
 }
+
+export function randomInt(min,max) {
+    let range = max - min;
+    let offset = Math.floor(ROT.RNG.getUniform()*(range+1));
+    return offset+min;
+}
+
 
 let randCharSource = '1234567890abcdefghijkslmnopqrstuvwxyz'.split('');
 export function uniqueId(tag){

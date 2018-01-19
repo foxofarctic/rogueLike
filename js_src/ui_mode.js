@@ -5,6 +5,7 @@ import {Color} from './color.js';
 import {MixableSymbol} from './mixableSym.js';
 import {DATASTORE,clearDataStore} from './datastore.js';
 import {EntityFactory} from './entities.js';
+import {SCHEDULER,TIME_ENGINE,initTiming} from './timing.js';
 
 //*******************************
 // unspecified mode class
@@ -172,9 +173,11 @@ export class UIModePlay extends UIMode {
   enter() {
     super.enter();
     this.game.isPlaying = true;
+    TIME_ENGINE.unlock();
   }
 
   startNewGame() {
+    initTiming();
     this._STATE = {};
     let m = MapMaker({xdim:60,ydim:20});
     //m.build();
@@ -196,6 +199,9 @@ export class UIModePlay extends UIMode {
 
     for(let mossCount = 0; mossCount<10; mossCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('moss'));
+    }
+    for(let monsterCount = 0; monsterCount < 1;monsterCount++){
+      m.addEntityAtRandomPosition(EntityFactory.create('monster'));
     }
   }
 
