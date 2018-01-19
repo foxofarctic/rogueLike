@@ -45,7 +45,7 @@ class Map{
   }
 
   extractEntity(ent){
-    delete this.state.MapPosToEntityId[this.state.entityIdToMapPos[ent.getId()]];
+    delete this.state.mapPosToEntityId[this.state.entityIdToMapPos[ent.getId()]];
     delete this.state.entityIdToMapPos[ent.getId()];
     return ent;
   }
