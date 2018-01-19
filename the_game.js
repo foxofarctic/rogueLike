@@ -9605,8 +9605,6 @@ var Map = function () {
   }, {
     key: 'isPositionOpen',
     value: function isPositionOpen(x, y) {
-      console.log(x);
-      console.log(y);
       if (this.tileGrid[x][y].isA('floor')) {
         return true;
       }
@@ -9622,10 +9620,7 @@ var Map = function () {
       var entId = this.state.mapPosToEntityId[x + ',' + y];
       if (entId) {
         info.entity = _datastore.DATASTORE.ENTITIES[entId];
-        console.log(info.entity);
       }
-      console.log("targetPosition");
-      console.dir(info);
 
       return info;
     }
@@ -9640,9 +9635,7 @@ var Map = function () {
       var yend = ystart + display.getOptions().height; //{{display height}};
 
       for (var xi = xstart; xi < xend; xi++) {
-        //console.log("outer");
         for (var yi = ystart; yi < yend; yi++) {
-          //console.log("inner");
           var pos = xi + ',' + yi;
           if (this.state.mapPosToEntityId[pos]) {
             _datastore.DATASTORE.ENTITIES[this.state.mapPosToEntityId[pos]].render(display, cx, cy);
@@ -9717,8 +9710,6 @@ var TILE_GRID_GENERATOR = {
 
   // creates maps
 };function MapMaker(mapData) {
-  //console.log("MapWidth" + mapWidth);
-  //console.log("MapH " + mapHeight);
   var m = new Map(mapData.xdim, mapData.ydim, mapData.mapType);
   if (mapData.id !== undefined) {
     m.setId(mapData.id);
@@ -9856,8 +9847,6 @@ var MixableSymbol = exports.MixableSymbol = function (_DisplaySymbol) {
           _this[method] = m.METHODS[method];
         }
       }
-      console.log("mixin stateNameSpace of " + template.mixinNames[_mi]);
-      console.dir(_this.state[m.META.stateNameSpace]);
     }
     for (var _mi2 = 0; _mi2 < _this.mixins.length; _mi2++) {
       var _m = _this.mixins[_mi2];
@@ -15528,14 +15517,6 @@ var Game = exports.Game = {
     console.log("Game object:");
     console.dir(Game);
 
-    //console.log("datastore object: ");
-    //console.dir(DATASTORE);
-    //DATASTORE.GAME = this;
-    // this._randomSeed = 5 + Math.floor(Math.random()*100000);
-    //this._randomSeed = 76250;
-    //console.log("using random seed "+this._randomSeed);
-    //ROT.RNG.setSeed(this._randomSeed);
-
     this.setupDisplays();
     this.setupModes();
     this.messageHandler.init(this.getDisplay('message'));
@@ -15543,10 +15524,6 @@ var Game = exports.Game = {
   },
 
   setupNewGame: function setupNewGame() {
-    //this._STATE.randomSeed = 5 + Math.floor(Math.random()*100000);
-    //this._STATE._randomSeed = 76250;
-    //console.log("using random seed "+this._STATE._randomSeed);
-    //ROT.RNG.setSeed(this._STATE._randomSeed);
     console.log("starting new game");
     (0, _datastore.clearDataStore)();
     _datastore.DATASTORE.GAME = this;
@@ -15879,11 +15856,8 @@ var UIModePersistence = exports.UIModePersistence = function (_UIMode2) {
       }
       for (var entID in state.ENTITIES) {
         _datastore.DATASTORE.ENTITIES[entID] = JSON.parse(state.ENTITIES[entID]);
-        console.log(_datastore.DATASTORE.ENTITIES[entID].name);
         var ent = _entities.EntityFactory.create(_datastore.DATASTORE.ENTITIES[entID].name);
         if (_datastore.DATASTORE.ENTITIES[entID].name == 'avatar') {
-          console.log("entity:");
-          console.dir(ent);
           this.game._mode.play._STATE.avatarID = ent.getId();
         }
         _datastore.DATASTORE.MAPS[Object.keys(_datastore.DATASTORE.MAPS)[0]].addEntityAt(ent, _datastore.DATASTORE.ENTITIES[entID].x, _datastore.DATASTORE.ENTITIES[entID].y);
@@ -15949,6 +15923,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       //DisplaySymbol({'name': 'avatar', 'chr':'@', 'fg' '#eb4'});
       var a = _entities.EntityFactory.create('avatar');
       var b = _entities.EntityFactory.create('moss');
+      var c = _entities.EntityFactory.create('monster');
       this._STATE.avatarId = a.getId();
       m.addEntityAtRandomPosition(a);
 
@@ -15969,21 +15944,10 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
     value: function fromJSON(json) {
       this._STATE = JSON.parse(json);
     }
-
-    // restoreFromState(stateData){
-    //   console.log('res');
-    //   console.dir(stateData);
-    //   this.state = stateData;
-    // }
-
   }, {
     key: 'render',
     value: function render() {
-      // this.display.drawText(1,1,"game play");
-      // this.display.drawText(1,3,"press any [Enter] to win");
-      // this.display.drawText(1,5,"press any [Escape] to lose");
       this.game.messageHandler.send("entering " + this.constructor.name);
-      //console.dir(DATASTORE.MAPS[this._STATE.curMapId]);
       _datastore.DATASTORE.MAPS[this._STATE.curMapId].render(this.display, this._STATE.cameraMapLoc.x, this._STATE.cameraMapLoc.y);
       //this.avatarSym.render(this.display,this._STATE.cameraDisplayLoc.x,this._STATE.cameraDisplayLoc.y);
     }
@@ -15992,7 +15956,6 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
     value: function renderAvatar(display) {
       display.clear();
       display.drawText(0, 0, "Avatar");
-      console.log(this.getAvatar());
       display.drawText(0, 2, "time: " + this.getAvatar().getTime());
       display.drawText(0, 3, "location: " + this.getAvatar().getX() + ", " + this.getAvatar().getY());
       display.drawText(0, 4, "Max HP: " + this.getAvatar().getMaxHp());
@@ -16300,8 +16263,6 @@ var PlayerMessage = exports.PlayerMessage = {
       _message.Message.send('can\'t move there because ' + evtData.reason);
     },
     'attacks': function attacks(evtData) {
-      console.log("message send");
-      console.dir(evtData.target);
       _message.Message.send(this.getName() + " attacks " + evtData.target.getName());
     },
     'damages': function damages(evtData) {
@@ -16359,8 +16320,6 @@ var WalkerCorporeal = exports.WalkerCorporeal = {
 
       var targetPositionInfo = this.getMap().getTargetPositionInfo(newX, newY);
       if (targetPositionInfo.entity) {
-        //console.log("entity target");
-        //console.log(targetPositionInfo.entity.name);
         this.raiseMixinEvent('bumpEntity', { actor: this, target: targetPositionInfo.entity });
         return false;
       } else {
@@ -16424,7 +16383,6 @@ var HitPoints = exports.HitPoints = {
   LISTENERS: {
     'damaged': function damaged(evtData) {
       //evtData.src
-      console.log("damaged again");
       this.loseHp(evtData.damageAmount);
       evtData.src.raiseMixinEvent('damages', { target: this, damageAmount: evtData.damageAmount });
       console.log("hp " + this.getHp());
@@ -16504,7 +16462,6 @@ var ActorPlayer = exports.ActorPlayer = {
       if (state !== undefined) {
         this.state._ActorPlayer.actingState = state;
       }
-      console.dir(this.state);
       return this.state._ActorPlayer.actingState;
     },
 

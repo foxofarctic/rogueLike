@@ -57,14 +57,6 @@ export let Game = {
     console.log("Game object:");
     console.dir(Game);
 
-    //console.log("datastore object: ");
-    //console.dir(DATASTORE);
-    //DATASTORE.GAME = this;
-    // this._randomSeed = 5 + Math.floor(Math.random()*100000);
-    //this._randomSeed = 76250;
-    //console.log("using random seed "+this._randomSeed);
-    //ROT.RNG.setSeed(this._randomSeed);
-
     this.setupDisplays();
     this.setupModes();
     this.messageHandler.init(this.getDisplay('message'));
@@ -72,10 +64,6 @@ export let Game = {
   },
 
   setupNewGame: function(){
-    //this._STATE.randomSeed = 5 + Math.floor(Math.random()*100000);
-    //this._STATE._randomSeed = 76250;
-    //console.log("using random seed "+this._STATE._randomSeed);
-    //ROT.RNG.setSeed(this._STATE._randomSeed);
     console.log("starting new game") ;
     clearDataStore();
     DATASTORE.GAME = this;

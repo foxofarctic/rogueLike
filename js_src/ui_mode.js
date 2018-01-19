@@ -140,11 +140,8 @@ export class UIModePersistence extends UIMode{
     }
     for (let entID in state.ENTITIES){
       DATASTORE.ENTITIES[entID] = JSON.parse(state.ENTITIES[entID]);
-      console.log(DATASTORE.ENTITIES[entID].name);
       let ent = EntityFactory.create(DATASTORE.ENTITIES[entID].name);
       if (DATASTORE.ENTITIES[entID].name == 'avatar'){
-        console.log("entity:");
-        console.dir(ent);
         this.game._mode.play._STATE.avatarID = ent.getId();
       }
       DATASTORE.MAPS[Object.keys(DATASTORE.MAPS)[0]].addEntityAt(ent, DATASTORE.ENTITIES[entID].x, DATASTORE.ENTITIES[entID].y)
@@ -196,6 +193,7 @@ export class UIModePlay extends UIMode {
     //DisplaySymbol({'name': 'avatar', 'chr':'@', 'fg' '#eb4'});
     let a = EntityFactory.create('avatar');
     let b = EntityFactory.create('moss');
+    let c = EntityFactory.create('monster');
     this._STATE.avatarId = a.getId();
     m.addEntityAtRandomPosition(a);
 
@@ -215,18 +213,8 @@ export class UIModePlay extends UIMode {
     this._STATE = JSON.parse(json);
   }
 
-  // restoreFromState(stateData){
-  //   console.log('res');
-  //   console.dir(stateData);
-  //   this.state = stateData;
-  // }
-
   render() {
-    // this.display.drawText(1,1,"game play");
-    // this.display.drawText(1,3,"press any [Enter] to win");
-    // this.display.drawText(1,5,"press any [Escape] to lose");
     this.game.messageHandler.send("entering " + this.constructor.name);
-    //console.dir(DATASTORE.MAPS[this._STATE.curMapId]);
     DATASTORE.MAPS[this._STATE.curMapId].render(this.display,
     this._STATE.cameraMapLoc.x,this._STATE.cameraMapLoc.y);
     //this.avatarSym.render(this.display,this._STATE.cameraDisplayLoc.x,this._STATE.cameraDisplayLoc.y);
@@ -235,7 +223,6 @@ export class UIModePlay extends UIMode {
   renderAvatar(display) {
     display.clear();
     display.drawText(0, 0, "Avatar");
-    console.log(this.getAvatar());
     display.drawText(0, 2, "time: " + this.getAvatar().getTime());
     display.drawText(0, 3, "location: " + this.getAvatar().getX() + ", " + this.getAvatar().getY());
     display.drawText(0, 4, "Max HP: " + this.getAvatar().getMaxHp());

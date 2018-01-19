@@ -34,8 +34,6 @@ export class MixableSymbol extends DisplaySymbol {
           this[method] = m.METHODS[method];
         }
       }
-      console.log("mixin stateNameSpace of " + template.mixinNames[mi] );
-      console.dir(this.state[m.META.stateNameSpace]);
     }
     for (let mi = 0; mi < this.mixins.length; mi++) {
       let m = this.mixins[mi];

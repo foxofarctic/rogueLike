@@ -83,8 +83,6 @@ class Map{
   }
 
   isPositionOpen(x,y){
-    console.log(x);
-    console.log(y);
     if ( this.tileGrid[x][y].isA('floor')){
       return true;
     }
@@ -99,10 +97,7 @@ class Map{
     let entId = this.state.mapPosToEntityId[`${x},${y}`];
     if (entId){
       info.entity = DATASTORE.ENTITIES[entId];
-      console.log(info.entity);
     }
-    console.log("targetPosition");
-    console.dir(info);
 
     return info;
   }
@@ -116,9 +111,7 @@ class Map{
     let yend = ystart + display.getOptions().height; //{{display height}};
 
     for(let xi=xstart; xi < xend; xi++){
-      //console.log("outer");
       for(let yi=ystart; yi < yend; yi++){
-        //console.log("inner");
         let pos = `${xi},${yi}`;
         if(this.state.mapPosToEntityId[pos]){
           DATASTORE.ENTITIES[this.state.mapPosToEntityId[pos]].render(display,cx,cy);
@@ -192,8 +185,6 @@ let TILE_GRID_GENERATOR = {
 
 // creates maps
 export function MapMaker(mapData) {
-  //console.log("MapWidth" + mapWidth);
-  //console.log("MapH " + mapHeight);
   let m = new Map(mapData.xdim, mapData.ydim, mapData.mapType);
   if (mapData.id !== undefined) { m.setId(mapData.id); }
   if (mapData.setupRngState !== undefined) { m.setRngState(mapData.setupRngState); }

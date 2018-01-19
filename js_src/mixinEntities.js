@@ -46,8 +46,6 @@ export let PlayerMessage = {
       Message.send('can\'t move there because ' + evtData.reason);
     },
     'attacks': function(evtData){
-      console.log("message send");
-      console.dir(evtData.target);
       Message.send(this.getName()+" attacks "+evtData.target.getName());
     },
     'damages': function(evtData){
@@ -105,8 +103,6 @@ export let WalkerCorporeal = {
 
       let targetPositionInfo = this.getMap().getTargetPositionInfo(newX,newY);
       if (targetPositionInfo.entity){
-        //console.log("entity target");
-        //console.log(targetPositionInfo.entity.name);
         this.raiseMixinEvent('bumpEntity', {actor: this, target: targetPositionInfo.entity});
         return false;
       } else {
@@ -170,7 +166,6 @@ export let HitPoints = {
   LISTENERS: {
     'damaged': function(evtData) {
       //evtData.src
-      console.log("damaged again");
       this.loseHp(evtData.damageAmount);
       evtData.src.raiseMixinEvent('damages',
       {target: this,damageAmount:evtData.damageAmount});
@@ -247,7 +242,6 @@ export let ActorPlayer = {
       if (state !== undefined) {
       this.state._ActorPlayer.actingState = state;
       }
-      console.dir(this.state);
       return this.state._ActorPlayer.actingState;
     },
 
