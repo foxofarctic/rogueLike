@@ -190,10 +190,15 @@ let TILE_GRID_GENERATOR = {
 }
 
 // creates maps
-export function MapMaker(mapWidth, mapHeight) {
-  console.log("MapWidth" + mapWidth);
-  console.log("MapH " + mapHeight);
-  let m = new Map(mapWidth, mapHeight);
+export function MapMaker(mapData) {
+  //console.log("MapWidth" + mapWidth);
+  //console.log("MapH " + mapHeight);
+  let m = new Map(mapData.xdim, mapData.ydim, mapData.mapType);
+  if (mapData.id !== undefined) { m.setId(mapData.id); }
+  if (mapData.setupRngState !== undefined) { m.setRngState(mapData.setupRngState); }
+  m.build();
+
   DATASTORE.MAPS[m.getId()] = m;
+
   return m;
 }

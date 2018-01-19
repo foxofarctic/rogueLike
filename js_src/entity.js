@@ -7,7 +7,7 @@ import {DATASTORE} from './datastore.js';
 export class Entity extends MixableSymbol {
   constructor(template) {
     super(template);
-    this.name = template.name;
+    this.state.name = template.name;
     if (!this.state){ this.state = {}; }
     this.state.x = 0;
     this.state.y = 0; // initial set

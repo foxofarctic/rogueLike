@@ -125,25 +125,29 @@ export class UIModePersistence extends UIMode{
     if (! this.localStorageAvailable()) {
       return;
     }
-    let serializedGameState = window.localStorage.getItem(this.game._PERSIST_NAMESPACE);
-    //this.game.fromJSON(serializedGameState);
-    // this.game.messageHandler.send("Game loaded");
-    // this.game.switchMode('play');
-    let savedState = JSON.parse(serializedGameState);
+    let restorationString = window.localStorage.getItem(this.game._PERSIST_NAMESPACE);
+    let state = JSON.parse(restorationString);
     clearDataStore();
+    DATASTORE.ID_SEQ = state.ID_SEQ;
+    DATASTORE.GAME = state.GAME;
 
-    //DATASTORE = JSON.parse(serializedGameState);
-    //DATASTORE.ID_SEQ = state.ID_SEQ;
-    DATASTORE.GAME = this.game;
-    this.game.fromJSON(savedState.GAME);
-
-    // gets Id and deserializes it to retrieve map object and the makes map
-    for (let savedMapId in savedState.MAPS) {
-      MapMaker(JSON.parse(savedState.MAPS[savedMapId]));
+    this.game.fromJSON(state.GAME);
+    for (let mapID in state.MAPS){
+      let mapData = JSON.parse(state.MAPS[mapID]);
+      DATASTORE.MAPS[mapID] = MapMaker(mapData); //mapData.xdim, mapData.ydim, mapData.setRngState);
+      DATASTORE.MAPS[mapID].build();
+    }
+    for (let entID in state.ENTITIES){
+      DATASTORE.ENTITIES[entID] = JSON.parse(state.ENTITIES[entID]);
+      console.log(DATASTORE.ENTITIES[entID].name);
+      let ent = EntityFactory.create(DATASTORE.ENTITIES[entID].name);
+      if (DATASTORE.ENTITIES[entID].name == 'avatar') {
+        this.game._mode.play._STATE.avatarID = ent.getID();
+      }
+      DATASTORE.MAPS[Object.keys(DATASTORE.MAPS)[0]].addEntityAt(ent, DATASTORE.ENTITIES[entID].x, DATASTORE.ENTITIES[entID].y)
+      delete DATASTORE.ENTITIES[entID];
     }
 
-    this.game.messageHandler.send("Game Loaded");
-    this.game.switchMode('play');
   }
 
   localStorageAvailable() {
@@ -172,7 +176,7 @@ export class UIModePlay extends UIMode {
 
   startNewGame() {
     this._STATE = {};
-    let m = MapMaker(60,20);
+    let m = MapMaker({xdim:60,ydim:20});
     //m.build();
     this._STATE.curMapId = m.getId();
     this._STATE.cameraMapLoc = {
