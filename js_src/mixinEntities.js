@@ -36,6 +36,7 @@ export let PlayerMessage = {
   META:{
     mixinName: 'PlayerMessage',
     mixinGroupName: 'Messager',
+    stateNameSpace: '_PlayeMessage',
     stateModel: {
       timeTaken: 0
     },
@@ -45,6 +46,8 @@ export let PlayerMessage = {
       Message.send('can\'t move there because ' + evtData.reason);
     },
     'attacks': function(evtData){
+      console.log("message send");
+      console.dir(evtData.target);
       Message.send(this.getName()+" attacks "+evtData.target.getName());
     },
     'damages': function(evtData){
@@ -102,7 +105,8 @@ export let WalkerCorporeal = {
 
       let targetPositionInfo = this.getMap().getTargetPositionInfo(newX,newY);
       if (targetPositionInfo.entity){
-        console.log("entity");
+        //console.log("entity target");
+        //console.log(targetPositionInfo.entity.name);
         this.raiseMixinEvent('bumpEntity', {actor: this, target: targetPositionInfo.entity});
         return false;
       } else {
@@ -131,29 +135,30 @@ export let HitPoints = {
     mixinGroupName: 'HitPoints',
     stateNameSpace: '_HitPoints',
     stateModel: {
-      maxHp: 1,
-      curHp: 1
+      maxHp: 0,
+      curHp: 0
     },
     initialize: function(template){
-      this.state._HitPoints.maxHp = template.maxHp;
+      this.state._HitPoints.maxHp = template.maxHp || 1;
       this.state._HitPoints.curHp = template.curHp || template.maxHp;
+      console.log("curHp: " + this.state._HitPoints.curHp);
     }
   },
   METHODS: {
     gainHp: function (amt){
       this.state._HitPoints.curHp += amt;
-      this.state._HitPoints.curHp - Math.min(this.maxHp, this.curHp);
+      this.state._HitPoints.curHp - Math.min(this.state._HitPoints.maxHp, this.state._HitPoints.curHp);
     },
     loseHp: function (amt){
-      this.state._HitPoints.curHp -= amt;
-      this.state._HitPoints.curHp = Math.min(this.maxHp, this.curHp);
+      this.state._HitPoints.curHp -= amt*1;
+      this.state._HitPoints.curHp = Math.min(this.state._HitPoints.maxHp, this.state._HitPoints.curHp);
     },
     getHp: function (){
       return this.state._HitPoints.curHp;
     },
     setHp: function (amt){
       this.state._HitPoints.curHp = amt;
-      this.state._HitPoints.curHp = Math.min(this.maxHp, this.curHp);
+      this.state._HitPoints.curHp = Math.min(this.state._HitPoints.maxHp, this.state._HitPoints.curHp);
     },
     getMaxHp: function (){
       return this.state._HitPoints.maxHp;
@@ -172,8 +177,8 @@ export let HitPoints = {
       console.log("hp "+ this.getHp());
 
       if (this.getHp() == 0){
-        this.raiseMixinEvent('killedBy',{src:evtData.src});
-        evtData.src.raiseMixinEvent('killedBy',{src:evtData.src});
+        this.raiseMixinEvent('killedBy',{src:evtData.src, target: evtData.target});
+        evtData.src.raiseMixinEvent('killedBy',{src:evtData.src, target: evtData.target});
         console.log("destroy");
         this.destroy();
       }
@@ -201,7 +206,7 @@ export let MeleeAttacker = {
   },
   LISTENERS: {
     'bumpEntity': function(evtData) {
-      evtData.target.raiseMixinEvent('damaged',{src:this,damageAmount:this.getMeleeDamage()});
+      evtData.target.raiseMixinEvent('damaged',{src:this,damageAmount:this.getMeleeDamage(), target: evtData.target});
       this.raiseMixinEvent('attacks', {actor:this,target:evtData.target});
     }
   }
@@ -212,7 +217,7 @@ export let ActorPlayer = {
   META: {
     mixInName:'ActorPlayer',
     mixInGroupName: 'ActorPlayer',
-    stateNamespace: '_ActorPlayer',
+    stateNameSpace: '_ActorPlayer',
     stateModel: {
       baseActionDuration: 1000,
       actingState: false,
@@ -273,7 +278,7 @@ export let ActorWanderer = {
   META: {
     mixInName:'ActorWanderer',
     mixInGroupName: 'ActorWanderer',
-    stateNamespace: '_ActorWanderer',
+    stateNameSpace: '_ActorWanderer',
     stateModel: {
       baseActionDuration: 1000,
       actingState: false,

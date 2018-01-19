@@ -9625,6 +9625,7 @@ var Map = function () {
         console.log(info.entity);
       }
       console.log("targetPosition");
+      console.dir(info);
 
       return info;
     }
@@ -9855,6 +9856,8 @@ var MixableSymbol = exports.MixableSymbol = function (_DisplaySymbol) {
           _this[method] = m.METHODS[method];
         }
       }
+      console.log("mixin stateNameSpace of " + template.mixinNames[_mi]);
+      console.dir(_this.state[m.META.stateNameSpace]);
     }
     for (var _mi2 = 0; _mi2 < _this.mixins.length; _mi2++) {
       var _m = _this.mixins[_mi2];
@@ -15525,8 +15528,8 @@ var Game = exports.Game = {
     console.log("Game object:");
     console.dir(Game);
 
-    console.log("datastore object: ");
-    console.dir(_datastore.DATASTORE);
+    //console.log("datastore object: ");
+    //console.dir(DATASTORE);
     //DATASTORE.GAME = this;
     // this._randomSeed = 5 + Math.floor(Math.random()*100000);
     //this._randomSeed = 76250;
@@ -15879,7 +15882,9 @@ var UIModePersistence = exports.UIModePersistence = function (_UIMode2) {
         console.log(_datastore.DATASTORE.ENTITIES[entID].name);
         var ent = _entities.EntityFactory.create(_datastore.DATASTORE.ENTITIES[entID].name);
         if (_datastore.DATASTORE.ENTITIES[entID].name == 'avatar') {
-          this.game._mode.play._STATE.avatarID = ent.getID();
+          console.log("entity:");
+          console.dir(ent);
+          this.game._mode.play._STATE.avatarID = ent.getId();
         }
         _datastore.DATASTORE.MAPS[Object.keys(_datastore.DATASTORE.MAPS)[0]].addEntityAt(ent, _datastore.DATASTORE.ENTITIES[entID].x, _datastore.DATASTORE.ENTITIES[entID].y);
         delete _datastore.DATASTORE.ENTITIES[entID];
@@ -15929,7 +15934,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
     value: function startNewGame() {
       (0, _timing.initTiming)();
       this._STATE = {};
-      var m = (0, _map.MapMaker)({ xdim: 60, ydim: 20 });
+      var m = (0, _map.MapMaker)({ xdim: 20, ydim: 20 });
       //m.build();
       this._STATE.curMapId = m.getId();
       this._STATE.cameraMapLoc = {
@@ -15947,7 +15952,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       this._STATE.avatarId = a.getId();
       m.addEntityAtRandomPosition(a);
 
-      for (var mossCount = 0; mossCount < 10; mossCount++) {
+      for (var mossCount = 0; mossCount < 1; mossCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('moss'));
       }
       for (var monsterCount = 0; monsterCount < 1; monsterCount++) {
@@ -16285,6 +16290,7 @@ var PlayerMessage = exports.PlayerMessage = {
   META: {
     mixinName: 'PlayerMessage',
     mixinGroupName: 'Messager',
+    stateNameSpace: '_PlayeMessage',
     stateModel: {
       timeTaken: 0
     }
@@ -16294,6 +16300,8 @@ var PlayerMessage = exports.PlayerMessage = {
       _message.Message.send('can\'t move there because ' + evtData.reason);
     },
     'attacks': function attacks(evtData) {
+      console.log("message send");
+      console.dir(evtData.target);
       _message.Message.send(this.getName() + " attacks " + evtData.target.getName());
     },
     'damages': function damages(evtData) {
@@ -16351,7 +16359,8 @@ var WalkerCorporeal = exports.WalkerCorporeal = {
 
       var targetPositionInfo = this.getMap().getTargetPositionInfo(newX, newY);
       if (targetPositionInfo.entity) {
-        console.log("entity");
+        //console.log("entity target");
+        //console.log(targetPositionInfo.entity.name);
         this.raiseMixinEvent('bumpEntity', { actor: this, target: targetPositionInfo.entity });
         return false;
       } else {
@@ -16380,29 +16389,30 @@ var HitPoints = exports.HitPoints = {
     mixinGroupName: 'HitPoints',
     stateNameSpace: '_HitPoints',
     stateModel: {
-      maxHp: 1,
-      curHp: 1
+      maxHp: 0,
+      curHp: 0
     },
     initialize: function initialize(template) {
-      this.state._HitPoints.maxHp = template.maxHp;
+      this.state._HitPoints.maxHp = template.maxHp || 1;
       this.state._HitPoints.curHp = template.curHp || template.maxHp;
+      console.log("curHp: " + this.state._HitPoints.curHp);
     }
   },
   METHODS: {
     gainHp: function gainHp(amt) {
       this.state._HitPoints.curHp += amt;
-      this.state._HitPoints.curHp - Math.min(this.maxHp, this.curHp);
+      this.state._HitPoints.curHp - Math.min(this.state._HitPoints.maxHp, this.state._HitPoints.curHp);
     },
     loseHp: function loseHp(amt) {
-      this.state._HitPoints.curHp -= amt;
-      this.state._HitPoints.curHp = Math.min(this.maxHp, this.curHp);
+      this.state._HitPoints.curHp -= amt * 1;
+      this.state._HitPoints.curHp = Math.min(this.state._HitPoints.maxHp, this.state._HitPoints.curHp);
     },
     getHp: function getHp() {
       return this.state._HitPoints.curHp;
     },
     setHp: function setHp(amt) {
       this.state._HitPoints.curHp = amt;
-      this.state._HitPoints.curHp = Math.min(this.maxHp, this.curHp);
+      this.state._HitPoints.curHp = Math.min(this.state._HitPoints.maxHp, this.state._HitPoints.curHp);
     },
     getMaxHp: function getMaxHp() {
       return this.state._HitPoints.maxHp;
@@ -16420,8 +16430,8 @@ var HitPoints = exports.HitPoints = {
       console.log("hp " + this.getHp());
 
       if (this.getHp() == 0) {
-        this.raiseMixinEvent('killedBy', { src: evtData.src });
-        evtData.src.raiseMixinEvent('killedBy', { src: evtData.src });
+        this.raiseMixinEvent('killedBy', { src: evtData.src, target: evtData.target });
+        evtData.src.raiseMixinEvent('killedBy', { src: evtData.src, target: evtData.target });
         console.log("destroy");
         this.destroy();
       }
@@ -16453,7 +16463,7 @@ var MeleeAttacker = exports.MeleeAttacker = {
   },
   LISTENERS: {
     'bumpEntity': function bumpEntity(evtData) {
-      evtData.target.raiseMixinEvent('damaged', { src: this, damageAmount: this.getMeleeDamage() });
+      evtData.target.raiseMixinEvent('damaged', { src: this, damageAmount: this.getMeleeDamage(), target: evtData.target });
       this.raiseMixinEvent('attacks', { actor: this, target: evtData.target });
     }
   }
@@ -16464,7 +16474,7 @@ var ActorPlayer = exports.ActorPlayer = {
   META: {
     mixInName: 'ActorPlayer',
     mixInGroupName: 'ActorPlayer',
-    stateNamespace: '_ActorPlayer',
+    stateNameSpace: '_ActorPlayer',
     stateModel: {
       baseActionDuration: 1000,
       actingState: false,
@@ -16525,7 +16535,7 @@ var ActorWanderer = exports.ActorWanderer = {
   META: {
     mixInName: 'ActorWanderer',
     mixInGroupName: 'ActorWanderer',
-    stateNamespace: '_ActorWanderer',
+    stateNameSpace: '_ActorWanderer',
     stateModel: {
       baseActionDuration: 1000,
       actingState: false,

@@ -142,8 +142,10 @@ export class UIModePersistence extends UIMode{
       DATASTORE.ENTITIES[entID] = JSON.parse(state.ENTITIES[entID]);
       console.log(DATASTORE.ENTITIES[entID].name);
       let ent = EntityFactory.create(DATASTORE.ENTITIES[entID].name);
-      if (DATASTORE.ENTITIES[entID].name == 'avatar') {
-        this.game._mode.play._STATE.avatarID = ent.getID();
+      if (DATASTORE.ENTITIES[entID].name == 'avatar'){
+        console.log("entity:");
+        console.dir(ent);
+        this.game._mode.play._STATE.avatarID = ent.getId();
       }
       DATASTORE.MAPS[Object.keys(DATASTORE.MAPS)[0]].addEntityAt(ent, DATASTORE.ENTITIES[entID].x, DATASTORE.ENTITIES[entID].y)
       delete DATASTORE.ENTITIES[entID];
@@ -179,7 +181,7 @@ export class UIModePlay extends UIMode {
   startNewGame() {
     initTiming();
     this._STATE = {};
-    let m = MapMaker({xdim:60,ydim:20});
+    let m = MapMaker({xdim:20,ydim:20});
     //m.build();
     this._STATE.curMapId = m.getId();
     this._STATE.cameraMapLoc = {
@@ -197,7 +199,7 @@ export class UIModePlay extends UIMode {
     this._STATE.avatarId = a.getId();
     m.addEntityAtRandomPosition(a);
 
-    for(let mossCount = 0; mossCount<10; mossCount++){
+    for(let mossCount = 0; mossCount<1; mossCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('moss'));
     }
     for(let monsterCount = 0; monsterCount < 1;monsterCount++){

@@ -94,7 +94,7 @@ class Map{
   getTargetPositionInfo(x,y){
     let info = {
       entity: '',
-      tile: this.getTile(x,y)
+      tile: this.getTile(x,y),
     };
     let entId = this.state.mapPosToEntityId[`${x},${y}`];
     if (entId){
@@ -102,6 +102,7 @@ class Map{
       console.log(info.entity);
     }
     console.log("targetPosition");
+    console.dir(info);
 
     return info;
   }

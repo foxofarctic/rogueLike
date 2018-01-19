@@ -57,8 +57,8 @@ export let Game = {
     console.log("Game object:");
     console.dir(Game);
 
-    console.log("datastore object: ");
-    console.dir(DATASTORE);
+    //console.log("datastore object: ");
+    //console.dir(DATASTORE);
     //DATASTORE.GAME = this;
     // this._randomSeed = 5 + Math.floor(Math.random()*100000);
     //this._randomSeed = 76250;
