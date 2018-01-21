@@ -175,6 +175,7 @@ export class UIModePlay extends UIMode {
   enter() {
     super.enter();
     this.game.isPlaying = true;
+    setKeyBinding(['play','movement_numpad']);
     TIME_ENGINE.unlock();
   }
 
@@ -199,6 +200,7 @@ export class UIModePlay extends UIMode {
     let c = EntityFactory.create('monster');
     this._STATE.avatarId = a.getId();
     m.addEntityAtRandomPosition(a);
+    this.moveCameraToAvatar();
 
     for(let mossCount = 0; mossCount<1; mossCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('moss'));
@@ -234,49 +236,48 @@ export class UIModePlay extends UIMode {
 
   handleInput(inputType,inputData) {
     // super.handleInput(inputType,inputData);
-    if (inputType == 'keyup') {
-      this.game.messageHandler.send(`you pressed the ${inputData.key} key`);
-      if (inputData.key == 'x') {
-        this.game.switchMode('win');
-      }
-      else if (inputData.key == 'l') {
-        this.game.switchMode('lose');
-      }
-      else if (inputData.key == 'p') {
-        this.game.switchMode('persistence');
-      }
-      else if (inputData.key == 'h' || inputData.key == 'H'){
-        this.game.switchMode('help');
-      }
+    console.log("input: " + inputType);
+    console.dir(inputData);
+   let gameCommand = getCommandFromInput(inputType,inputData);
+   console.log(gameCommand);
 
-      // navigation (keeping in mind that top left is 0,0, so positive y moves you down)
+   if (gameCommand == COMMAND.NULLCOMMAND) { return false; }
 
-      else if (inputData.key == 's') {
-        this.moveAvatar(0,1);
-      }
-      // else if (inputData.key == '3') {
-      //   this.moveAvatar(1,1);
-      // }
-      else if (inputData.key == 'a') {
-        this.moveAvatar(-1,0);
-      }
-      // else if (inputData.key == '5') {
-      //   this.moveAvatar(0,0);
-      // }
-      else if (inputData.key == 'd') {
-        this.moveAvatar(1,0);
-      }
-      // else if (inputData.key == '7') {
-      //   this.moveAvatar(-1,-1);
-      // }
-      else if (inputData.key == 'w') {
-        this.moveAvatar(0,-1);
-      }
-      // else if (inputData.key == '9') {
-      //   this.moveAvatar(1,-1);
-      // }
-    }
-  }
+   if (gameCommand == COMMAND.GAME_CONTROLS) {
+     this.game.switchMode('persistence');
+     return false;
+   }
+   if (gameCommand == COMMAND.HELP){
+     this.game.switchMode('help');
+   }
+
+  //  if (gameCommand == COMMAND.MESSAGES) {
+  //    this.game.switchMode('messages');
+  //    return false;
+  //  }
+
+   let avatarMoved = false;
+   if (gameCommand == COMMAND.MOVE_U) {
+     avatarMoved = this.moveAvatar(0,-1);
+   } else
+   if (gameCommand == COMMAND.MOVE_L) {
+     avatarMoved = this.moveAvatar(-1,0);
+   } else
+   if (gameCommand == COMMAND.MOVE_R) {
+     avatarMoved = this.moveAvatar(1,0);
+   } else
+   if (gameCommand == COMMAND.MOVE_D) {
+     avatarMoved = this.moveAvatar(0,1);
+   }
+
+   if (avatarMoved) {
+     this.moveCameraToAvatar();
+   }
+
+   //this.checkGameWinLose();
+   return true;
+
+}
 
   moveAvatar(dx,dy){
     if (DATASTORE.ENTITIES[this._STATE.avatarId].tryWalk(dx,dy)) {
@@ -315,7 +316,7 @@ export class UIModeHelp extends UIMode{
 
   handleInput(inputType,inputData) {
     // super.handleInput(inputType, inputData);
-    if (inputData.keyCode == 'h' || 'H') {
+    if (getCommandFromInput(inputType,inputData) == COMMAND.HELP) {
       this.game.switchMode('play');
     }
   }

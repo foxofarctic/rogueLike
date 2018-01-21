@@ -15907,6 +15907,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
     value: function enter() {
       _get(UIModePlay.prototype.__proto__ || Object.getPrototypeOf(UIModePlay.prototype), 'enter', this).call(this);
       this.game.isPlaying = true;
+      (0, _command.setKeyBinding)(['play', 'movement_numpad']);
       _timing.TIME_ENGINE.unlock();
     }
   }, {
@@ -15932,6 +15933,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       var c = _entities.EntityFactory.create('monster');
       this._STATE.avatarId = a.getId();
       m.addEntityAtRandomPosition(a);
+      this.moveCameraToAvatar();
 
       for (var mossCount = 0; mossCount < 1; mossCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('moss'));
@@ -15971,45 +15973,45 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
     key: 'handleInput',
     value: function handleInput(inputType, inputData) {
       // super.handleInput(inputType,inputData);
-      if (inputType == 'keyup') {
-        this.game.messageHandler.send('you pressed the ' + inputData.key + ' key');
-        if (inputData.key == 'x') {
-          this.game.switchMode('win');
-        } else if (inputData.key == 'l') {
-          this.game.switchMode('lose');
-        } else if (inputData.key == 'p') {
-          this.game.switchMode('persistence');
-        } else if (inputData.key == 'h' || inputData.key == 'H') {
-          this.game.switchMode('help');
-        }
+      console.log("input: " + inputType);
+      console.dir(inputData);
+      var gameCommand = (0, _command.getCommandFromInput)(inputType, inputData);
+      console.log(gameCommand);
 
-        // navigation (keeping in mind that top left is 0,0, so positive y moves you down)
-
-        else if (inputData.key == 's') {
-            this.moveAvatar(0, 1);
-          }
-          // else if (inputData.key == '3') {
-          //   this.moveAvatar(1,1);
-          // }
-          else if (inputData.key == 'a') {
-              this.moveAvatar(-1, 0);
-            }
-            // else if (inputData.key == '5') {
-            //   this.moveAvatar(0,0);
-            // }
-            else if (inputData.key == 'd') {
-                this.moveAvatar(1, 0);
-              }
-              // else if (inputData.key == '7') {
-              //   this.moveAvatar(-1,-1);
-              // }
-              else if (inputData.key == 'w') {
-                  this.moveAvatar(0, -1);
-                }
-        // else if (inputData.key == '9') {
-        //   this.moveAvatar(1,-1);
-        // }
+      if (gameCommand == _command.COMMAND.NULLCOMMAND) {
+        return false;
       }
+
+      if (gameCommand == _command.COMMAND.GAME_CONTROLS) {
+        this.game.switchMode('persistence');
+        return false;
+      }
+      if (gameCommand == _command.COMMAND.HELP) {
+        this.game.switchMode('help');
+      }
+
+      //  if (gameCommand == COMMAND.MESSAGES) {
+      //    this.game.switchMode('messages');
+      //    return false;
+      //  }
+
+      var avatarMoved = false;
+      if (gameCommand == _command.COMMAND.MOVE_U) {
+        avatarMoved = this.moveAvatar(0, -1);
+      } else if (gameCommand == _command.COMMAND.MOVE_L) {
+        avatarMoved = this.moveAvatar(-1, 0);
+      } else if (gameCommand == _command.COMMAND.MOVE_R) {
+        avatarMoved = this.moveAvatar(1, 0);
+      } else if (gameCommand == _command.COMMAND.MOVE_D) {
+        avatarMoved = this.moveAvatar(0, 1);
+      }
+
+      if (avatarMoved) {
+        this.moveCameraToAvatar();
+      }
+
+      //this.checkGameWinLose();
+      return true;
     }
   }, {
     key: 'moveAvatar',
@@ -16066,7 +16068,7 @@ var UIModeHelp = exports.UIModeHelp = function (_UIMode4) {
     key: 'handleInput',
     value: function handleInput(inputType, inputData) {
       // super.handleInput(inputType, inputData);
-      if (inputData.keyCode == 'h' || 'H') {
+      if ((0, _command.getCommandFromInput)(inputType, inputData) == _command.COMMAND.HELP) {
         this.game.switchMode('play');
       }
     }
@@ -16903,10 +16905,10 @@ function setKeyBinding(bindingNameList) {
       }
     }
   }
-  // console.log('COMMAND');
-  // console.dir(COMMAND);
-  // console.log('BINDING_LOOKUPS');
-  // console.dir(BINDING_LOOKUPS);
+  console.log('COMMAND');
+  console.dir(COMMAND);
+  console.log('BINDING_LOOKUPS');
+  console.dir(BINDING_LOOKUPS);
 }
 
 // these define the key bindings for the various game commands, though the actual lookup uses different object that's generated from this one.
@@ -16916,7 +16918,7 @@ function setKeyBinding(bindingNameList) {
 var KEY_BINDINGS = {
   'universal': {
     'CANCEL': ['key:Escape,altKey:false,ctrlKey:false,shiftKey:false'],
-    'HELP': ['key:?,altKey:false,ctrlKey:false,shiftKey:true']
+    'HELP': ['key:h,altKey:false,ctrlKey:false,shiftKey:false']
   },
   'persistence': {
     'NEW_GAME': ['key:n,altKey:false,ctrlKey:false,shiftKey:false', 'key:N,altKey:false,ctrlKey:false,shiftKey:true'],
@@ -16924,19 +16926,20 @@ var KEY_BINDINGS = {
     'LOAD_GAME': ['key:l,altKey:false,ctrlKey:false,shiftKey:false', 'key:L,altKey:false,ctrlKey:false,shiftKey:true']
   },
   'play': {
-    'GAME_CONTROLS': ['key:=,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MESSAGES': ['key:M,altKey:false,ctrlKey:false,shiftKey:true']
+    'GAME_CONTROLS': ['key:p,altKey:false,ctrlKey:false,shiftKey:false'],
+    'MESSAGES': ['key:M,altKey:false,ctrlKey:false,shiftKey:true'],
+    'HELP': ['key:h,altKey:false,ctrlKey:false,shiftKey:false']
   },
   'movement_numpad': {
-    'MOVE_UL': ['key:7,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_U': ['key:8,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_UR': ['key:9,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_L': ['key:4,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_WAIT': ['key:5,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_R': ['key:6,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_DL': ['key:1,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_D': ['key:2,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_DR': ['key:3,altKey:false,ctrlKey:false,shiftKey:false']
+    //'MOVE_UL':  ['key:7,altKey:false,ctrlKey:false,shiftKey:false'],
+    'MOVE_U': ['key:w,altKey:false,ctrlKey:false,shiftKey:false'],
+    //'MOVE_UR':  ['key:9,altKey:false,ctrlKey:false,shiftKey:false'],
+    'MOVE_L': ['key:a,altKey:false,ctrlKey:false,shiftKey:false'],
+    //'MOVE_WAIT':['key:5,altKey:false,ctrlKey:false,shiftKey:false'],
+    'MOVE_R': ['key:d,altKey:false,ctrlKey:false,shiftKey:false'],
+    //  'MOVE_DL':  ['key:1,altKey:false,ctrlKey:false,shiftKey:false'],
+    'MOVE_D': ['key:s,altKey:false,ctrlKey:false,shiftKey:false']
+    //  'MOVE_DR':  ['key:3,altKey:false,ctrlKey:false,shiftKey:false']
   }
 };
 

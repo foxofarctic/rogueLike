@@ -46,10 +46,10 @@ export function setKeyBinding(bindingNameList) {
       }
     }
   }
-  // console.log('COMMAND');
-  // console.dir(COMMAND);
-  // console.log('BINDING_LOOKUPS');
-  // console.dir(BINDING_LOOKUPS);
+  console.log('COMMAND');
+  console.dir(COMMAND);
+  console.log('BINDING_LOOKUPS');
+  console.dir(BINDING_LOOKUPS);
 }
 
 // these define the key bindings for the various game commands, though the actual lookup uses different object that's generated from this one.
@@ -59,7 +59,7 @@ export function setKeyBinding(bindingNameList) {
 let KEY_BINDINGS = {
   'universal': {
     'CANCEL': ['key:Escape,altKey:false,ctrlKey:false,shiftKey:false'],
-    'HELP': ['key:?,altKey:false,ctrlKey:false,shiftKey:true']
+    'HELP': ['key:h,altKey:false,ctrlKey:false,shiftKey:false']
   },
   'persistence': {
     'NEW_GAME': ['key:n,altKey:false,ctrlKey:false,shiftKey:false',
@@ -70,18 +70,19 @@ let KEY_BINDINGS = {
                 'key:L,altKey:false,ctrlKey:false,shiftKey:true'],
   },
   'play': {
-    'GAME_CONTROLS':['key:=,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MESSAGES':     ['key:M,altKey:false,ctrlKey:false,shiftKey:true']
+    'GAME_CONTROLS':['key:p,altKey:false,ctrlKey:false,shiftKey:false'],
+    'MESSAGES':     ['key:M,altKey:false,ctrlKey:false,shiftKey:true'],
+    'HELP':         ['key:h,altKey:false,ctrlKey:false,shiftKey:false']
   },
   'movement_numpad': {
-    'MOVE_UL':  ['key:7,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_U':   ['key:8,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_UR':  ['key:9,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_L':   ['key:4,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_WAIT':['key:5,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_R':   ['key:6,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_DL':  ['key:1,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_D':   ['key:2,altKey:false,ctrlKey:false,shiftKey:false'],
-    'MOVE_DR':  ['key:3,altKey:false,ctrlKey:false,shiftKey:false']
+    //'MOVE_UL':  ['key:7,altKey:false,ctrlKey:false,shiftKey:false'],
+    'MOVE_U':   ['key:w,altKey:false,ctrlKey:false,shiftKey:false'],
+    //'MOVE_UR':  ['key:9,altKey:false,ctrlKey:false,shiftKey:false'],
+    'MOVE_L':   ['key:a,altKey:false,ctrlKey:false,shiftKey:false'],
+    //'MOVE_WAIT':['key:5,altKey:false,ctrlKey:false,shiftKey:false'],
+    'MOVE_R':   ['key:d,altKey:false,ctrlKey:false,shiftKey:false'],
+  //  'MOVE_DL':  ['key:1,altKey:false,ctrlKey:false,shiftKey:false'],
+    'MOVE_D':   ['key:s,altKey:false,ctrlKey:false,shiftKey:false']
+  //  'MOVE_DR':  ['key:3,altKey:false,ctrlKey:false,shiftKey:false']
   }
 };
