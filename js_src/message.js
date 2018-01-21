@@ -1,3 +1,4 @@
+import {Color} from './color.js';
 export let Message = {
   _curMessage: '',
   _targetDisplay: '',
@@ -7,13 +8,14 @@ export let Message = {
   render: function () {
     if (! this._targetDisplay) { return; }
     this._targetDisplay.clear();
-    this._targetDisplay.drawText(1,1,this._curMessage,'#fff','#000');
+    this._targetDisplay.drawText(1,1,this._curMessage,Color.FG,Color.BG);
   },
   send: function (msg) {
     this._curMessage = msg;
     this.render();
   },
   clear: function () {
-    this._curMessage = '';
+    //this._curMessage = '';
+    targetDisplay.drawText(1,1,'',Color.FG,Color.BG);
   }
 };

@@ -9882,6 +9882,10 @@ var MixableSymbol = exports.MixableSymbol = function (_DisplaySymbol) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.Message = undefined;
+
+var _color = __webpack_require__(131);
+
 var Message = exports.Message = {
   _curMessage: '',
   _targetDisplay: '',
@@ -9893,14 +9897,15 @@ var Message = exports.Message = {
       return;
     }
     this._targetDisplay.clear();
-    this._targetDisplay.drawText(1, 1, this._curMessage, '#fff', '#000');
+    this._targetDisplay.drawText(1, 1, this._curMessage, _color.Color.FG, _color.Color.BG);
   },
   send: function send(msg) {
     this._curMessage = msg;
     this.render();
   },
   clear: function clear() {
-    this._curMessage = '';
+    //this._curMessage = '';
+    targetDisplay.drawText(1, 1, '', _color.Color.FG, _color.Color.BG);
   }
 };
 
@@ -15472,7 +15477,7 @@ console.dir(_rotJs2.default);
 
 var Game = exports.Game = {
 
-  messageHandler: _message.Message,
+  //messageHandler: Message,
 
   _mode: {
     start: '',
@@ -15480,6 +15485,7 @@ var Game = exports.Game = {
     play: '',
     win: '',
     lose: '',
+    messages: '',
     help: ''
   },
   _curMode: '',
@@ -15519,7 +15525,7 @@ var Game = exports.Game = {
 
     this.setupDisplays();
     this.setupModes();
-    this.messageHandler.init(this.getDisplay('message'));
+    _message.Message.init(this.getDisplay('message'));
     this.switchMode('start');
   },
 
@@ -15540,6 +15546,7 @@ var Game = exports.Game = {
     this._mode.persistence = new _ui_mode.UIModePersistence(this); // need to implement in uimode
     this._mode.play = new _ui_mode.UIModePlay(this);
     this._mode.win = new _ui_mode.UIModeWin(this);
+    this._mode.messages = new _ui_mode.UIModeMessages(this);
     this._mode.lose = new _ui_mode.UIModeLose(this);
     this._mode.help = new _ui_mode.UIModeHelp(this);
     //this.switchMode('start');
@@ -15579,7 +15586,7 @@ var Game = exports.Game = {
   },
 
   renderMessage: function renderMessage() {
-    this.messageHandler.render();
+    _message.Message.render();
   },
 
   renderDisplayMain: function renderDisplayMain() {
@@ -15648,7 +15655,7 @@ var Game = exports.Game = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.UIModeLose = exports.UIModeWin = exports.UIModeHelp = exports.UIModePlay = exports.UIModePersistence = exports.UIModeStart = undefined;
+exports.UIModeLose = exports.UIModeWin = exports.UIModeMessages = exports.UIModeHelp = exports.UIModePlay = exports.UIModePersistence = exports.UIModeStart = undefined;
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
@@ -15663,6 +15670,8 @@ var _map = __webpack_require__(129);
 var _color = __webpack_require__(131);
 
 var _mixableSym = __webpack_require__(132);
+
+var _message = __webpack_require__(133);
 
 var _datastore = __webpack_require__(42);
 
@@ -15745,7 +15754,7 @@ var UIModeStart = exports.UIModeStart = function (_UIMode) {
     key: 'enter',
     value: function enter() {
       _get(UIModeStart.prototype.__proto__ || Object.getPrototypeOf(UIModeStart.prototype), 'enter', this).call(this);
-      this.game.messageHandler.send("Welcome to Lucas Game");
+      _message.Message.send("Welcome to Lucas Game");
     }
   }, {
     key: 'render',
@@ -15813,7 +15822,7 @@ var UIModePersistence = exports.UIModePersistence = function (_UIMode2) {
 
       if (gameCommand == _command.COMMAND.NEW_GAME) {
         this.game.setupNewGame();
-        this.game.messageHandler.send("New game started");
+        _message.Message.send("New game started");
         this.game.switchMode('play');
       } else if (gameCommand == _command.COMMAND.SAVE_GAME) {
         if (this.game.isPlaying) {
@@ -15839,7 +15848,7 @@ var UIModePersistence = exports.UIModePersistence = function (_UIMode2) {
       //let serializedGameState = this.game.toJSON();
       window.localStorage.setItem(this.game._PERSIST_NAMESPACE, JSON.stringify(_datastore.DATASTORE));
       this.game.hasSaved = true;
-      this.game.messageHandler.send("Game saved");
+      _message.Message.send("Game saved");
       this.game.switchMode('play');
     }
   }, {
@@ -15880,7 +15889,7 @@ var UIModePersistence = exports.UIModePersistence = function (_UIMode2) {
         window.localStorage.removeItem(x);
         return true;
       } catch (e) {
-        this.game.messageHandler.send('Sorry, no local data storage is available, so no save/load possible');
+        _message.Message.send('Sorry, no local data storage is available, so no save/load possible');
         return false;
       }
     }
@@ -15955,7 +15964,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
   }, {
     key: 'render',
     value: function render() {
-      this.game.messageHandler.send("entering " + this.constructor.name);
+      _message.Message.send("entering " + this.constructor.name);
       _datastore.DATASTORE.MAPS[this._STATE.curMapId].render(this.display, this._STATE.cameraMapLoc.x, this._STATE.cameraMapLoc.y);
       //this.avatarSym.render(this.display,this._STATE.cameraDisplayLoc.x,this._STATE.cameraDisplayLoc.y);
     }
@@ -15973,10 +15982,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
     key: 'handleInput',
     value: function handleInput(inputType, inputData) {
       // super.handleInput(inputType,inputData);
-      console.log("input: " + inputType);
-      console.dir(inputData);
       var gameCommand = (0, _command.getCommandFromInput)(inputType, inputData);
-      console.log(gameCommand);
 
       if (gameCommand == _command.COMMAND.NULLCOMMAND) {
         return false;
@@ -15989,11 +15995,10 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       if (gameCommand == _command.COMMAND.HELP) {
         this.game.switchMode('help');
       }
-
-      //  if (gameCommand == COMMAND.MESSAGES) {
-      //    this.game.switchMode('messages');
-      //    return false;
-      //  }
+      if (gameCommand == _command.COMMAND.MESSAGES) {
+        this.game.switchMode('messages');
+        return false;
+      }
 
       var avatarMoved = false;
       if (gameCommand == _command.COMMAND.MOVE_U) {
@@ -16021,7 +16026,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
         this.moveCameraToAvatar();
         //this.render();
       } else {
-        this.game.messageHandler.send("you cannot move there");
+        _message.Message.send("you cannot move there");
       }
     }
   }, {
@@ -16078,11 +16083,45 @@ var UIModeHelp = exports.UIModeHelp = function (_UIMode4) {
 }(UIMode);
 
 //********************************************
+
+
+var UIModeMessages = exports.UIModeMessages = function (_UIMode5) {
+  _inherits(UIModeMessages, _UIMode5);
+
+  function UIModeMessages() {
+    _classCallCheck(this, UIModeMessages);
+
+    return _possibleConstructorReturn(this, (UIModeMessages.__proto__ || Object.getPrototypeOf(UIModeMessages)).apply(this, arguments));
+  }
+
+  _createClass(UIModeMessages, [{
+    key: 'render',
+    value: function render() {
+      _message.Message.render(this.display);
+    }
+  }, {
+    key: 'handleInput',
+    value: function handleInput(inputType, inputData) {
+      if (inputType == 'keyup') {
+        if (inputData.key == 'Escape') {
+          if (this.game.isPlaying) {
+            this.game.switchMode('play');
+          }
+        }
+        return false;
+      }
+    }
+  }]);
+
+  return UIModeMessages;
+}(UIMode);
+
+//********************************************
 // winning mode
 
 
-var UIModeWin = exports.UIModeWin = function (_UIMode5) {
-  _inherits(UIModeWin, _UIMode5);
+var UIModeWin = exports.UIModeWin = function (_UIMode6) {
+  _inherits(UIModeWin, _UIMode6);
 
   function UIModeWin() {
     _classCallCheck(this, UIModeWin);
@@ -16095,7 +16134,7 @@ var UIModeWin = exports.UIModeWin = function (_UIMode5) {
     value: function render() {
       this.display.drawText(1, 1, "game win", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 3, "you WIN!!", _color.Color.FG, _color.Color.BG);
-      this.game.messageHandler.send("entering " + this.constructor.name);
+      _message.Message.send("entering " + this.constructor.name);
     }
   }]);
 
@@ -16106,8 +16145,8 @@ var UIModeWin = exports.UIModeWin = function (_UIMode5) {
 //losing mode
 
 
-var UIModeLose = exports.UIModeLose = function (_UIMode6) {
-  _inherits(UIModeLose, _UIMode6);
+var UIModeLose = exports.UIModeLose = function (_UIMode7) {
+  _inherits(UIModeLose, _UIMode7);
 
   function UIModeLose() {
     _classCallCheck(this, UIModeLose);
@@ -16120,7 +16159,7 @@ var UIModeLose = exports.UIModeLose = function (_UIMode6) {
     value: function render() {
       this.display.drawText(1, 1, "game lose", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 3, "you lose.", _color.Color.FG, _color.Color.BG);
-      this.game.messageHandler.send("entering " + this.constructor.name);
+      _message.Message.send("entering " + this.constructor.name);
     }
   }]);
 
@@ -16271,6 +16310,7 @@ var PlayerMessage = exports.PlayerMessage = {
       _message.Message.send('can\'t move there because ' + evtData.reason);
     },
     'attacks': function attacks(evtData) {
+      console.log("attacked");
       _message.Message.send(this.getName() + " attacks " + evtData.target.getName());
     },
     'damages': function damages(evtData) {

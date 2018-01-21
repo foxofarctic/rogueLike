@@ -1,7 +1,7 @@
 
 import ROT from 'rot-js';
 import * as U from './util.js';
-import {UIModeStart, UIModePlay, UIModeWin, UIModeLose, UIModePersistence, UIModeHelp} from './ui_mode.js';
+import {UIModeStart, UIModePlay, UIModeWin, UIModeLose, UIModePersistence, UIModeHelp, UIModeMessages} from './ui_mode.js';
 import {Message} from './message.js' ;
 import {DATASTORE, clearDataStore} from './datastore.js';
 import {initTiming} from './timing.js';
@@ -12,7 +12,7 @@ console.dir(ROT);
 
 export let Game = {
 
-  messageHandler: Message,
+  //messageHandler: Message,
 
   _mode: {
     start: '',
@@ -20,6 +20,7 @@ export let Game = {
     play: '',
     win: '',
     lose: '',
+    messages: '',
     help: ''
   },
   _curMode: '',
@@ -59,7 +60,7 @@ export let Game = {
 
     this.setupDisplays();
     this.setupModes();
-    this.messageHandler.init(this.getDisplay('message'));
+    Message.init(this.getDisplay('message'));
     this.switchMode('start');
   },
 
@@ -80,6 +81,7 @@ export let Game = {
     this._mode.persistence = new UIModePersistence(this); // need to implement in uimode
     this._mode.play = new UIModePlay(this);
     this._mode.win = new UIModeWin(this);
+    this._mode.messages = new UIModeMessages(this);
     this._mode.lose = new UIModeLose(this);
     this._mode.help = new UIModeHelp(this);
     //this.switchMode('start');
@@ -119,7 +121,7 @@ export let Game = {
   },
 
   renderMessage: function() {
-     this.messageHandler.render();
+     Message.render();
   },
 
   renderDisplayMain: function() {

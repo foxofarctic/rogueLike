@@ -46,6 +46,7 @@ export let PlayerMessage = {
       Message.send('can\'t move there because ' + evtData.reason);
     },
     'attacks': function(evtData){
+      console.log("attacked");
       Message.send(this.getName()+" attacks "+evtData.target.getName());
     },
     'damages': function(evtData){

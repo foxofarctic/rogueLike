@@ -3,6 +3,7 @@ import ROT from 'rot-js';
 import {MapMaker} from './map.js';
 import {Color} from './color.js';
 import {MixableSymbol} from './mixableSym.js';
+import {Message} from './message.js' ;
 import {DATASTORE,clearDataStore} from './datastore.js';
 import {EntityFactory} from './entities.js';
 import {SCHEDULER,TIME_ENGINE,initTiming} from './timing.js';
@@ -46,7 +47,7 @@ class UIMode {
 export class UIModeStart extends UIMode {
   enter() {
     super.enter();
-    this.game.messageHandler.send("Welcome to Lucas Game");
+    Message.send("Welcome to Lucas Game");
   }
 
   render() {
@@ -93,7 +94,7 @@ export class UIModePersistence extends UIMode{
 
     if (gameCommand == COMMAND.NEW_GAME) {
       this.game.setupNewGame();
-      this.game.messageHandler.send("New game started");
+      Message.send("New game started");
       this.game.switchMode('play');
     } else
     if (gameCommand == COMMAND.SAVE_GAME) {
@@ -121,7 +122,7 @@ export class UIModePersistence extends UIMode{
     //let serializedGameState = this.game.toJSON();
     window.localStorage.setItem(this.game._PERSIST_NAMESPACE,JSON.stringify(DATASTORE)) ;
     this.game.hasSaved = true;
-    this.game.messageHandler.send("Game saved");
+    Message.send("Game saved");
     this.game.switchMode('play');
   }
 
@@ -162,7 +163,7 @@ export class UIModePersistence extends UIMode{
       return true;
     }
     catch(e) {
-      this.game.messageHandler.send('Sorry, no local data storage is available, so no save/load possible');
+      Message.send('Sorry, no local data storage is available, so no save/load possible');
       return false;
     }
   }
@@ -219,7 +220,7 @@ export class UIModePlay extends UIMode {
   }
 
   render() {
-    this.game.messageHandler.send("entering " + this.constructor.name);
+    Message.send("entering " + this.constructor.name);
     DATASTORE.MAPS[this._STATE.curMapId].render(this.display,
     this._STATE.cameraMapLoc.x,this._STATE.cameraMapLoc.y);
     //this.avatarSym.render(this.display,this._STATE.cameraDisplayLoc.x,this._STATE.cameraDisplayLoc.y);
@@ -236,10 +237,7 @@ export class UIModePlay extends UIMode {
 
   handleInput(inputType,inputData) {
     // super.handleInput(inputType,inputData);
-    console.log("input: " + inputType);
-    console.dir(inputData);
    let gameCommand = getCommandFromInput(inputType,inputData);
-   console.log(gameCommand);
 
    if (gameCommand == COMMAND.NULLCOMMAND) { return false; }
 
@@ -250,11 +248,10 @@ export class UIModePlay extends UIMode {
    if (gameCommand == COMMAND.HELP){
      this.game.switchMode('help');
    }
-
-  //  if (gameCommand == COMMAND.MESSAGES) {
-  //    this.game.switchMode('messages');
-  //    return false;
-  //  }
+   if (gameCommand == COMMAND.MESSAGES) {
+     this.game.switchMode('messages');
+     return false;
+   }
 
    let avatarMoved = false;
    if (gameCommand == COMMAND.MOVE_U) {
@@ -276,7 +273,6 @@ export class UIModePlay extends UIMode {
 
    //this.checkGameWinLose();
    return true;
-
 }
 
   moveAvatar(dx,dy){
@@ -285,7 +281,7 @@ export class UIModePlay extends UIMode {
       this.moveCameraToAvatar();
       //this.render();
     } else {
-      this.game.messageHandler.send("you cannot move there");
+      Message.send("you cannot move there");
     }
   }
 
@@ -324,12 +320,30 @@ export class UIModeHelp extends UIMode{
 }
 
 //********************************************
+export class UIModeMessages extends UIMode {
+  render() {
+    Message.render(this.display);
+  }
+
+  handleInput(inputType,inputData) {
+    if (inputType == 'keyup') {
+      if (inputData.key == 'Escape') {
+        if (this.game.isPlaying) {
+          this.game.switchMode('play');
+        }
+      }
+      return false;
+    }
+  }
+}
+
+//********************************************
 // winning mode
 export class UIModeWin extends UIMode {
   render() {
     this.display.drawText(1,1,"game win", Color.FG,Color.BG);
     this.display.drawText(1,3,"you WIN!!", Color.FG,Color.BG);
-    this.game.messageHandler.send("entering " + this.constructor.name);
+    Message.send("entering " + this.constructor.name);
   }
 }
 
@@ -340,6 +354,6 @@ export class UIModeLose extends UIMode {
   render() {
     this.display.drawText(1,1,"game lose",Color.FG,Color.BG);
     this.display.drawText(1,3,"you lose.",Color.FG,Color.BG);
-    this.game.messageHandler.send("entering " + this.constructor.name);
+    Message.send("entering " + this.constructor.name);
   }
 }
