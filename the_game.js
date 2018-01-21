@@ -16211,7 +16211,7 @@ var TILES = exports.TILES = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.ActorWanderer = exports.ActorPlayer = exports.MeleeAttacker = exports.HitPoints = exports.WalkerCorporeal = exports.TimeTracker = exports.PlayerMessage = undefined;
+exports.RandomWalker = exports.ActorWanderer = exports.ActorPlayer = exports.MeleeAttacker = exports.HitPoints = exports.WalkerCorporeal = exports.TimeTracker = exports.PlayerMessage = undefined;
 
 var _message = __webpack_require__(133);
 
@@ -16336,6 +16336,12 @@ var WalkerCorporeal = exports.WalkerCorporeal = {
         }
       }
       return false;
+    }
+  },
+  LISTENERS: {
+    'tryWalking': function tryWalking(evtData) {
+      console.log("trying to walk");
+      this.tryWalk(evtData.dx, evtData.dy);
     }
   }
 };
@@ -16469,6 +16475,7 @@ var ActorPlayer = exports.ActorPlayer = {
       if (this.isActing()) {
         return;
       }
+      _timing.SCHEDULER.next().raiseMixinEvent('enemyTurn');
       this.isActing(true);
       _timing.TIME_ENGINE.lock();
       this.isActing(false);
@@ -16541,6 +16548,54 @@ var ActorWanderer = exports.ActorWanderer = {
   }
 };
 
+//*************************************
+var RandomWalker = exports.RandomWalker = {
+  META: {
+    mixinName: 'RandomWalker',
+    mixinGroupName: 'Actor',
+    stateNamespace: '_RandomWalker',
+    stateModel: {
+      actingState: false
+    },
+    initialize: function initialize(template) {
+      console.log("RandomWalker initialized");
+      _timing.SCHEDULER.add(this, true);
+    }
+  },
+  METHODS: {
+    act: function act() {
+      console.log("enemy now moving");
+      if (this.actingState == false) {
+        return;
+      }
+      //console.log("walker is acting");
+      //Rand number from -1 to 1
+      var dx = ROT.RNG.getUniformInt(-1, 1);
+      //console.log(dx);
+      var dy = ROT.RNG.getUniformInt(-1, 1);
+      if (dx == 0 && dy == 0) {
+        dy = 1;
+      }
+      //console.log(dy);
+      this.raiseMixinEvent('tryWalking', { 'dx': dx, 'dy': dy });
+      this.actingState = false;
+      this.raiseMixinEvent('playerTurn');
+    }
+  },
+  LISTENERS: {
+    defeats: function defeats(evtData) {
+      // Message.send(this.getName() + " died");
+      _timing.SCHEDULER.remove(this);
+      // this.destroy();
+    },
+    'enemyTurn': function enemyTurn() {
+      this.actingState = true;
+      //console.log(this.actingState);
+      this.act();
+    }
+  }
+};
+
 /***/ }),
 /* 342 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -16583,8 +16638,8 @@ EntityFactory.learn({
   'name': 'monster',
   'chr': '&',
   'fg': '#d63',
-  'maxHp': 50,
-  'mixInNames': ['ActorWanderer', 'WalkerCorporeal', 'HitPoints']
+  'maxHp': 5,
+  'mixinNames': ['HitPoints', 'WalkerCorporeal', 'RandomWalker', 'ActorWanderer']
 
 });
 

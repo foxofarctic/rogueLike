@@ -120,8 +120,16 @@ export let WalkerCorporeal = {
       }
       return false;
     }
+  },
+  LISTENERS: {
+    'tryWalking': function(evtData) {
+      console.log("trying to walk");
+      this.tryWalk(evtData.dx, evtData.dy);
+    }
   }
 };
+
+
 
 //******************************************
 
@@ -250,6 +258,7 @@ export let ActorPlayer = {
       if (this.isActing()) {
         return;
       }
+      SCHEDULER.next().raiseMixinEvent('enemyTurn');
       this.isActing(true);
       TIME_ENGINE.lock();
       this.isActing(false);
@@ -315,6 +324,54 @@ export let ActorWanderer = {
       this.setCurrentActionDuration(this.getBaseActionDuration()+randomInt(-5,5));
       setTimeout(function(){ TIME_ENGINE.unlock();},1);
       console.log("Player still working");
+    }
+  }
+};
+
+//*************************************
+export let RandomWalker = {
+  META: {
+    mixinName: 'RandomWalker',
+    mixinGroupName: 'Actor',
+    stateNamespace: '_RandomWalker',
+    stateModel: {
+      actingState: false,
+    },
+    initialize: function(template){
+      console.log("RandomWalker initialized");
+      SCHEDULER.add(this, true);
+    }
+  },
+  METHODS: {
+    act: function(){
+      console.log("enemy now moving");
+      if(this.actingState == false){
+        return;
+      }
+      //console.log("walker is acting");
+      //Rand number from -1 to 1
+      let dx = ROT.RNG.getUniformInt(-1, 1);
+      //console.log(dx);
+      let dy = ROT.RNG.getUniformInt(-1, 1);
+      if (dx == 0 && dy == 0) {
+        dy = 1;
+      }
+      //console.log(dy);
+      this.raiseMixinEvent('tryWalking', { 'dx': dx, 'dy': dy});
+      this.actingState = false;
+      this.raiseMixinEvent('playerTurn');
+    }
+  },
+  LISTENERS: {
+    defeats: function(evtData){
+      // Message.send(this.getName() + " died");
+      SCHEDULER.remove(this);
+      // this.destroy();
+    },
+    'enemyTurn': function() {
+      this.actingState = true;
+      //console.log(this.actingState);
+      this.act();
     }
   }
 };

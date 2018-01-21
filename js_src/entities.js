@@ -27,7 +27,8 @@ EntityFactory.learn({
     'name': 'monster',
     'chr': '&',
     'fg': '#d63',
-    'maxHp': 50,
-    'mixInNames':['ActorWanderer','WalkerCorporeal','HitPoints']
+    'maxHp': 5,
+    'mixinNames': ['HitPoints','WalkerCorporeal','RandomWalker','ActorWanderer']
+
 
   });
