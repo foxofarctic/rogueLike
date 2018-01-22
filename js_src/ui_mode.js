@@ -132,6 +132,8 @@ export class UIModePersistence extends UIMode{
     }
     let restorationString = window.localStorage.getItem(this.game._PERSIST_NAMESPACE);
     let state = JSON.parse(restorationString);
+    console.log("Restore");
+    console.dir(state);
     clearDataStore();
     DATASTORE.ID_SEQ = state.ID_SEQ;
     DATASTORE.GAME = state.GAME;
@@ -197,8 +199,6 @@ export class UIModePlay extends UIMode {
 
     //DisplaySymbol({'name': 'avatar', 'chr':'@', 'fg' '#eb4'});
     let a = EntityFactory.create('avatar');
-    let b = EntityFactory.create('moss');
-    let c = EntityFactory.create('monster');
     this._STATE.avatarId = a.getId();
     m.addEntityAtRandomPosition(a);
     this.moveCameraToAvatar();

@@ -15859,6 +15859,8 @@ var UIModePersistence = exports.UIModePersistence = function (_UIMode2) {
       }
       var restorationString = window.localStorage.getItem(this.game._PERSIST_NAMESPACE);
       var state = JSON.parse(restorationString);
+      console.log("Restore");
+      console.dir(state);
       (0, _datastore.clearDataStore)();
       _datastore.DATASTORE.ID_SEQ = state.ID_SEQ;
       _datastore.DATASTORE.GAME = state.GAME;
@@ -15938,8 +15940,6 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
 
       //DisplaySymbol({'name': 'avatar', 'chr':'@', 'fg' '#eb4'});
       var a = _entities.EntityFactory.create('avatar');
-      var b = _entities.EntityFactory.create('moss');
-      var c = _entities.EntityFactory.create('monster');
       this._STATE.avatarId = a.getId();
       m.addEntityAtRandomPosition(a);
       this.moveCameraToAvatar();
@@ -16613,6 +16613,9 @@ var ActorWanderer = exports.ActorWanderer = {
   },
 
   LISTENERS: {
+    // 'killedBy': function(){
+    //   SCHEDULER.remove(this);
+    // },
     'actionDone': function actionDone() {
       _timing.SCHEDULER.setDuration(this.getCurrentActionDuration());
       this.setCurrentActionDuration(this.getBaseActionDuration() + (0, _util.randomInt)(-5, 5));
@@ -16815,6 +16818,8 @@ var _util = __webpack_require__(65);
 
 var _datastore = __webpack_require__(42);
 
+var _timing = __webpack_require__(96);
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -16907,6 +16912,7 @@ var Entity = exports.Entity = function (_MixableSymbol) {
       console.log("destroy");
       this.getMap().extractEntity(this);
       delete _datastore.DATASTORE[this.getId()];
+      _timing.SCHEDULER.remove(this);
     }
   }, {
     key: 'moveBy',
