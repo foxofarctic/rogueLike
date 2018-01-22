@@ -4,6 +4,8 @@ import {SCHEDULER,TIME_ENGINE,initTiming} from'./timing.js';
 import {DATASTORE} from './datastore.js';
 import {Map} from './map.js';
 import {randomInt} from './util.js';
+import ROT from 'rot-js';
+
 
 let ExampleMixin = {
   META:{
@@ -102,6 +104,8 @@ export let WalkerCorporeal = {
       let newX = this.state.x*1 + dx*1;
       let newY = this.state.y*1 + dy*1;
 
+      //TIME_ENGINE.unlock
+      console.dir(DATASTORE.MAPS[this.state.mapId]);
       let targetPositionInfo = this.getMap().getTargetPositionInfo(newX,newY);
       if (targetPositionInfo.entity){
         this.raiseMixinEvent('bumpEntity', {actor: this, target: targetPositionInfo.entity});
@@ -115,6 +119,7 @@ export let WalkerCorporeal = {
           this.getMap().updateEntityPosition(this, this.state.x, this.state.y);
 
           this.raiseMixinEvent('turnTaken', {timeUsed: 1});
+          this.raiseMixinEvent('actionDone');
 
           return true;
         }
@@ -125,6 +130,7 @@ export let WalkerCorporeal = {
   LISTENERS: {
     'tryWalking': function(evtData) {
       console.log("trying to walk");
+      console.dir(this);
       this.tryWalk(evtData.dx, evtData.dy);
     }
   }
@@ -216,6 +222,8 @@ export let MeleeAttacker = {
   LISTENERS: {
     'bumpEntity': function(evtData) {
       evtData.target.raiseMixinEvent('damaged',{src:this,damageAmount:this.getMeleeDamage(), target: evtData.target});
+//      evtData.target.raiseMixinEvent('damaged',{src:evtData.target,damageAmount:this.getMeleeDamage(), target: this});
+
       this.raiseMixinEvent('attacks', {actor:this,target:evtData.target});
     }
   }
@@ -235,7 +243,8 @@ export let ActorPlayer = {
 
     initialize: function(){
       console.log("initialize Player Actor");
-      SCHEDULER.add(this,true,1)
+      SCHEDULER.add(this,true,1);
+      TIME_ENGINE.lock();
     }
   },
 
@@ -264,7 +273,7 @@ export let ActorPlayer = {
       if (this.isActing()) {
         return;
       }
-      SCHEDULER.next().raiseMixinEvent('enemyTurn');
+      // SCHEDULER.next().raiseMixinEvent('enemyTurn');
       this.isActing(true);
       TIME_ENGINE.lock();
       this.isActing(false);
@@ -273,11 +282,16 @@ export let ActorPlayer = {
   },
 
   LISTENERS: {
-    'actionDone': function(evtData){
+    'actionDone': function(){
+      console.log(this.getCurrentActionDuration());
+
       SCHEDULER.setDuration(this.getCurrentActionDuration());
+      console.log("scheduler");
+      console.dir(SCHEDULER);
       this.setCurrentActionDuration(this.getBaseActionDuration()+randomInt(-5,5));
       setTimeout(function(){ TIME_ENGINE.unlock();},1);
       console.log("Player still working");
+      //this.act();
     }
   }
 };
@@ -318,69 +332,71 @@ export let ActorWanderer = {
       TIME_ENGINE.lock();
       let dx = randomInt(-1,1);
       let dy = randomInt(-1,1);
-      this.raiseMixinEvent('walkAttempt',{'dx':dx, 'dy':dy});
-      SCHEDULER.setDuration(1000);
-      TIME_ENGINE.unlock();
+      this.raiseMixinEvent('tryWalking',{'dx':dx, 'dy':dy});
+      // SCHEDULER.setDuration(1000);
+      // TIME_ENGINE.unlock();
     }
   },
 
   LISTENERS: {
-    'actionDone': function(evtData){
+    'actionDone': function(){
       SCHEDULER.setDuration(this.getCurrentActionDuration());
       this.setCurrentActionDuration(this.getBaseActionDuration()+randomInt(-5,5));
       setTimeout(function(){ TIME_ENGINE.unlock();},1);
-      console.log("Player still working");
+      console.log("Wanderer still working");
     }
   }
 };
 
-//*************************************
-export let RandomWalker = {
-  META: {
-    mixinName: 'RandomWalker',
-    mixinGroupName: 'Actor',
-    stateNamespace: '_RandomWalker',
-    stateModel: {
-      actingState: false,
-    },
-    initialize: function(template){
-      console.log("RandomWalker initialized");
-      SCHEDULER.add(this, true);
-    }
-  },
-  METHODS: {
-    act: function(){
-      console.log("enemy now moving");
-      if(this.actingState == false){
-        return;
-      }
-      //console.log("walker is acting");
-      //Rand number from -1 to 1
-      let dx = ROT.RNG.getUniformInt(-1, 1);
-      //console.log(dx);
-      let dy = ROT.RNG.getUniformInt(-1, 1);
-      if (dx == 0 && dy == 0) {
-        dy = 1;
-      }
-      //console.log(dy);
-      this.raiseMixinEvent('tryWalking', { 'dx': dx, 'dy': dy});
-      this.actingState = false;
-      this.raiseMixinEvent('playerTurn');
-    }
-  },
-  LISTENERS: {
-    defeats: function(evtData){
-      // Message.send(this.getName() + " died");
-      SCHEDULER.remove(this);
-      // this.destroy();
-    },
-    'enemyTurn': function() {
-      this.actingState = true;
-      //console.log(this.actingState);
-      this.act();
-    }
-  }
-};
+// //*************************************
+// export let RandomWalker = {
+//   META: {
+//     mixinName: 'RandomWalker',
+//     mixinGroupName: 'Actor',
+//     stateNamespace: '_RandomWalker',
+//     stateModel: {
+//       actingState: false,
+//     },
+//     initialize: function(template){
+//       console.log("RandomWalker initialized");
+//       SCHEDULER.add(this, true);
+//     }
+//   },
+//   METHODS: {
+//     act: function(){
+//       console.log("enemy now moving");
+//       if(this.actingState == false){
+//         return;
+//       }
+//       //console.log("walker is acting");
+//       //Rand number from -1 to 1
+//       let dx = ROT.RNG.getUniformInt(-1, 1);
+//       //console.log(dx);
+//       let dy = ROT.RNG.getUniformInt(-1, 1);
+//       if (dx == 0 && dy == 0) {
+//         dy = 1;
+//       }
+//       //console.log(dy);
+//       this.raiseMixinEvent('tryWalking', { 'dx': dx, 'dy': dy});
+//       this.actingState = false;
+//       //this.raiseMixinEvent('actionDone');
+//     }
+//   },
+//   LISTENERS: {
+//     'killedBy': function(evtData){
+//       // Message.send(this.getName() + " died");
+//       SCHEDULER.remove(this);
+//       // this.destroy();
+//     }//,
+//     // 'enemyTurn': function() {
+//     //   console.log("enemy turn");
+//     //
+//     //   this.actingState = true;
+//     //   //console.log(this.actingState);
+//     //   this.act();
+//     // }
+//   }
+// };
 
 export let Scorekeeper = {
   META:{

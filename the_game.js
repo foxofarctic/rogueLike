@@ -16010,6 +16010,9 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
         avatarMoved = this.moveAvatar(1, 0);
       } else if (gameCommand == _command.COMMAND.MOVE_D) {
         avatarMoved = this.moveAvatar(0, 1);
+      } else if (gameCommand == _command.COMMAND.REST) {
+        avatarMoved = this.moveAvatar(0, 0);
+        _datastore.DATASTORE.ENTITIES[this._STATE.avatarId].gainHp(1);
       }
 
       if (avatarMoved) {
@@ -16067,8 +16070,9 @@ var UIModeHelp = exports.UIModeHelp = function (_UIMode4) {
       this.display.drawText(1, 6, "a - move left", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 7, "s - move down", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 8, "d - move right", _color.Color.FG, _color.Color.BG);
-      this.display.drawText(1, 9, "p - pause/ enter persistence mode", _color.Color.FG, _color.Color.BG);
-      this.display.drawText(1, 10, "h - help screen", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 9, "r - rest", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 10, "p - pause/ enter persistence mode", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 11, "h - help screen", _color.Color.FG, _color.Color.BG);
     }
   }, {
     key: 'handleInput',
@@ -16259,7 +16263,7 @@ var TILES = exports.TILES = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Scorekeeper = exports.RandomWalker = exports.ActorWanderer = exports.ActorPlayer = exports.MeleeAttacker = exports.HitPoints = exports.WalkerCorporeal = exports.TimeTracker = exports.PlayerMessage = undefined;
+exports.Scorekeeper = exports.ActorWanderer = exports.ActorPlayer = exports.MeleeAttacker = exports.HitPoints = exports.WalkerCorporeal = exports.TimeTracker = exports.PlayerMessage = undefined;
 
 var _message = __webpack_require__(95);
 
@@ -16271,6 +16275,13 @@ var _map = __webpack_require__(131);
 
 var _util = __webpack_require__(65);
 
+var _rotJs = __webpack_require__(47);
+
+var _rotJs2 = _interopRequireDefault(_rotJs);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//defines the various mixins that can be added to an Entity
 var ExampleMixin = {
   META: {
     mixinName: 'ExampleMixin',
@@ -16296,7 +16307,6 @@ var ExampleMixin = {
 
 //******************************************
 
-//defines the various mixins that can be added to an Entity
 var PlayerMessage = exports.PlayerMessage = {
   META: {
     mixinName: 'PlayerMessage',
@@ -16367,6 +16377,8 @@ var WalkerCorporeal = exports.WalkerCorporeal = {
       var newX = this.state.x * 1 + dx * 1;
       var newY = this.state.y * 1 + dy * 1;
 
+      //TIME_ENGINE.unlock
+      console.dir(_datastore.DATASTORE.MAPS[this.state.mapId]);
       var targetPositionInfo = this.getMap().getTargetPositionInfo(newX, newY);
       if (targetPositionInfo.entity) {
         this.raiseMixinEvent('bumpEntity', { actor: this, target: targetPositionInfo.entity });
@@ -16380,6 +16392,7 @@ var WalkerCorporeal = exports.WalkerCorporeal = {
           this.getMap().updateEntityPosition(this, this.state.x, this.state.y);
 
           this.raiseMixinEvent('turnTaken', { timeUsed: 1 });
+          this.raiseMixinEvent('actionDone');
 
           return true;
         }
@@ -16390,6 +16403,7 @@ var WalkerCorporeal = exports.WalkerCorporeal = {
   LISTENERS: {
     'tryWalking': function tryWalking(evtData) {
       console.log("trying to walk");
+      console.dir(this);
       this.tryWalk(evtData.dx, evtData.dy);
     }
   }
@@ -16482,6 +16496,8 @@ var MeleeAttacker = exports.MeleeAttacker = {
   LISTENERS: {
     'bumpEntity': function bumpEntity(evtData) {
       evtData.target.raiseMixinEvent('damaged', { src: this, damageAmount: this.getMeleeDamage(), target: evtData.target });
+      //      evtData.target.raiseMixinEvent('damaged',{src:evtData.target,damageAmount:this.getMeleeDamage(), target: this});
+
       this.raiseMixinEvent('attacks', { actor: this, target: evtData.target });
     }
   }
@@ -16502,6 +16518,7 @@ var ActorPlayer = exports.ActorPlayer = {
     initialize: function initialize() {
       console.log("initialize Player Actor");
       _timing.SCHEDULER.add(this, true, 1);
+      _timing.TIME_ENGINE.lock();
     }
   },
 
@@ -16529,7 +16546,7 @@ var ActorPlayer = exports.ActorPlayer = {
       if (this.isActing()) {
         return;
       }
-      _timing.SCHEDULER.next().raiseMixinEvent('enemyTurn');
+      // SCHEDULER.next().raiseMixinEvent('enemyTurn');
       this.isActing(true);
       _timing.TIME_ENGINE.lock();
       this.isActing(false);
@@ -16538,13 +16555,18 @@ var ActorPlayer = exports.ActorPlayer = {
   },
 
   LISTENERS: {
-    'actionDone': function actionDone(evtData) {
+    'actionDone': function actionDone() {
+      console.log(this.getCurrentActionDuration());
+
       _timing.SCHEDULER.setDuration(this.getCurrentActionDuration());
+      console.log("scheduler");
+      console.dir(_timing.SCHEDULER);
       this.setCurrentActionDuration(this.getBaseActionDuration() + (0, _util.randomInt)(-5, 5));
       setTimeout(function () {
         _timing.TIME_ENGINE.unlock();
       }, 1);
       console.log("Player still working");
+      //this.act();
     }
   }
 };
@@ -16584,71 +16606,73 @@ var ActorWanderer = exports.ActorWanderer = {
       _timing.TIME_ENGINE.lock();
       var dx = (0, _util.randomInt)(-1, 1);
       var dy = (0, _util.randomInt)(-1, 1);
-      this.raiseMixinEvent('walkAttempt', { 'dx': dx, 'dy': dy });
-      _timing.SCHEDULER.setDuration(1000);
-      _timing.TIME_ENGINE.unlock();
+      this.raiseMixinEvent('tryWalking', { 'dx': dx, 'dy': dy });
+      // SCHEDULER.setDuration(1000);
+      // TIME_ENGINE.unlock();
     }
   },
 
   LISTENERS: {
-    'actionDone': function actionDone(evtData) {
+    'actionDone': function actionDone() {
       _timing.SCHEDULER.setDuration(this.getCurrentActionDuration());
       this.setCurrentActionDuration(this.getBaseActionDuration() + (0, _util.randomInt)(-5, 5));
       setTimeout(function () {
         _timing.TIME_ENGINE.unlock();
       }, 1);
-      console.log("Player still working");
+      console.log("Wanderer still working");
     }
   }
 };
 
-//*************************************
-var RandomWalker = exports.RandomWalker = {
-  META: {
-    mixinName: 'RandomWalker',
-    mixinGroupName: 'Actor',
-    stateNamespace: '_RandomWalker',
-    stateModel: {
-      actingState: false
-    },
-    initialize: function initialize(template) {
-      console.log("RandomWalker initialized");
-      _timing.SCHEDULER.add(this, true);
-    }
-  },
-  METHODS: {
-    act: function act() {
-      console.log("enemy now moving");
-      if (this.actingState == false) {
-        return;
-      }
-      //console.log("walker is acting");
-      //Rand number from -1 to 1
-      var dx = ROT.RNG.getUniformInt(-1, 1);
-      //console.log(dx);
-      var dy = ROT.RNG.getUniformInt(-1, 1);
-      if (dx == 0 && dy == 0) {
-        dy = 1;
-      }
-      //console.log(dy);
-      this.raiseMixinEvent('tryWalking', { 'dx': dx, 'dy': dy });
-      this.actingState = false;
-      this.raiseMixinEvent('playerTurn');
-    }
-  },
-  LISTENERS: {
-    defeats: function defeats(evtData) {
-      // Message.send(this.getName() + " died");
-      _timing.SCHEDULER.remove(this);
-      // this.destroy();
-    },
-    'enemyTurn': function enemyTurn() {
-      this.actingState = true;
-      //console.log(this.actingState);
-      this.act();
-    }
-  }
-};
+// //*************************************
+// export let RandomWalker = {
+//   META: {
+//     mixinName: 'RandomWalker',
+//     mixinGroupName: 'Actor',
+//     stateNamespace: '_RandomWalker',
+//     stateModel: {
+//       actingState: false,
+//     },
+//     initialize: function(template){
+//       console.log("RandomWalker initialized");
+//       SCHEDULER.add(this, true);
+//     }
+//   },
+//   METHODS: {
+//     act: function(){
+//       console.log("enemy now moving");
+//       if(this.actingState == false){
+//         return;
+//       }
+//       //console.log("walker is acting");
+//       //Rand number from -1 to 1
+//       let dx = ROT.RNG.getUniformInt(-1, 1);
+//       //console.log(dx);
+//       let dy = ROT.RNG.getUniformInt(-1, 1);
+//       if (dx == 0 && dy == 0) {
+//         dy = 1;
+//       }
+//       //console.log(dy);
+//       this.raiseMixinEvent('tryWalking', { 'dx': dx, 'dy': dy});
+//       this.actingState = false;
+//       //this.raiseMixinEvent('actionDone');
+//     }
+//   },
+//   LISTENERS: {
+//     'killedBy': function(evtData){
+//       // Message.send(this.getName() + " died");
+//       SCHEDULER.remove(this);
+//       // this.destroy();
+//     }//,
+//     // 'enemyTurn': function() {
+//     //   console.log("enemy turn");
+//     //
+//     //   this.actingState = true;
+//     //   //console.log(this.actingState);
+//     //   this.act();
+//     // }
+//   }
+// };
 
 var Scorekeeper = exports.Scorekeeper = {
   META: {
@@ -16722,7 +16746,7 @@ EntityFactory.learn({
   'chr': '&',
   'fg': '#d63',
   'maxHp': 5,
-  'mixinNames': ['HitPoints', 'WalkerCorporeal', 'RandomWalker', 'ActorWanderer', 'Scorekeeper']
+  'mixinNames': ['HitPoints', 'WalkerCorporeal', 'ActorWanderer', 'Scorekeeper']
 
 });
 
@@ -17003,7 +17027,8 @@ var KEY_BINDINGS = {
   'play': {
     'GAME_CONTROLS': ['key:p,altKey:false,ctrlKey:false,shiftKey:false'],
     'MESSAGES': ['key:M,altKey:false,ctrlKey:false,shiftKey:true'],
-    'HELP': ['key:h,altKey:false,ctrlKey:false,shiftKey:false']
+    'HELP': ['key:h,altKey:false,ctrlKey:false,shiftKey:false'],
+    'REST': ['key:r,altKey:false,ctrlKey:false,shiftKey:false']
   },
   'movement_numpad': {
     //'MOVE_UL':  ['key:7,altKey:false,ctrlKey:false,shiftKey:false'],

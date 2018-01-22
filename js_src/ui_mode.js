@@ -233,7 +233,7 @@ export class UIModePlay extends UIMode {
     display.drawText(0, 3, "location: " + this.getAvatar().getX() + ", " + this.getAvatar().getY());
     display.drawText(0, 4, "Max HP: " + this.getAvatar().getMaxHp());
     display.drawText(0, 5, "Current HP: " + this.getAvatar().getHp());
-    display.drawText(0, 6, "Score: " + this.getAvatar().getScore());  
+    display.drawText(0, 6, "Score: " + this.getAvatar().getScore());
   }
 
   handleInput(inputType,inputData) {
@@ -266,6 +266,10 @@ export class UIModePlay extends UIMode {
    } else
    if (gameCommand == COMMAND.MOVE_D) {
      avatarMoved = this.moveAvatar(0,1);
+   } else
+   if (gameCommand == COMMAND.REST){
+     avatarMoved = this.moveAvatar(0,0);
+     DATASTORE.ENTITIES[this._STATE.avatarId].gainHp(1);
    }
 
    if (avatarMoved) {
@@ -306,8 +310,9 @@ export class UIModeHelp extends UIMode{
     this.display.drawText(1, 6, "a - move left", Color.FG, Color.BG);
     this.display.drawText(1, 7, "s - move down", Color.FG, Color.BG);
     this.display.drawText(1, 8, "d - move right", Color.FG, Color.BG);
-    this.display.drawText(1, 9, "p - pause/ enter persistence mode", Color.FG, Color.BG);
-    this.display.drawText(1, 10, "h - help screen", Color.FG, Color.BG);
+    this.display.drawText(1, 9, "r - rest", Color.FG, Color.BG);
+    this.display.drawText(1, 10, "p - pause/ enter persistence mode", Color.FG, Color.BG);
+    this.display.drawText(1, 11, "h - help screen", Color.FG, Color.BG);
 
   }
 
