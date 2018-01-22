@@ -13,7 +13,7 @@ The "Lucas game" is a simple game of survival, progression, and growth.
 
 Lucas has a poor sense of direction. One night on one of his midnight strolls through Mordor, he stumbles his way into a castle full of dangerous creatures. He must find his way out!
 ### Mechanics
-  * Lucas can attack his enemies by touching the arrow key towardsthem when they are adjacent to him
+  * Lucas can attack his enemies by touching the arrow key towards them when they are adjacent to him
   * Lucas dies if he does not have adequate meals(nourishment meter?)
   * Lucas also dies when his HP is reduced to 0.
   * to replenish HP Lucas must rest, but resting takes turns so it can be dangerous with monsters around (maybe potions too)
@@ -21,10 +21,12 @@ Lucas has a poor sense of direction. One night on one of his midnight strolls th
   * weapons make his attack more potent
   * he cannot walk through walls
   * can only see objects/monsters in his immediate surroundings
-  
+
 ### Winning
-  * to win the user must navigate through all the castle levels 
-  * The users scoreis based on how quickly they manage to escape
+  * to win the user must destroy all monsters 
+  * The users score is based on how quickly they manage to escape
+  * each monster killed adds 30 points to your score
+
 ### Notes
 
 git:
