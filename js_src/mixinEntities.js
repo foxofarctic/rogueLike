@@ -38,7 +38,7 @@ export let PlayerMessage = {
   META:{
     mixinName: 'PlayerMessage',
     mixinGroupName: 'Messager',
-    stateNameSpace: '_PlayeMessage',
+    stateNameSpace: '_PlayerMessage',
     stateModel: {
       timeTaken: 0
     },
@@ -48,7 +48,7 @@ export let PlayerMessage = {
       Message.send('can\'t move there because ' + evtData.reason);
     },
     'attacks': function(evtData){
-      console.log("attacked");
+      console.log(this.getName() + "attacked");
       Message.send(this.getName()+" attacks "+evtData.target.getName());
     },
     'damages': function(evtData){
@@ -107,7 +107,7 @@ export let WalkerCorporeal = {
       //TIME_ENGINE.unlock
       console.dir(DATASTORE.MAPS[this.state.mapId]);
       let targetPositionInfo = this.getMap().getTargetPositionInfo(newX,newY);
-      if (targetPositionInfo.entity){
+      if (targetPositionInfo.entity && targetPositionInfo.entity != this){
         this.raiseMixinEvent('bumpEntity', {actor: this, target: targetPositionInfo.entity});
         return false;
       } else {
@@ -158,7 +158,7 @@ export let HitPoints = {
   METHODS: {
     gainHp: function (amt){
       this.state._HitPoints.curHp += amt;
-      this.state._HitPoints.curHp - Math.min(this.state._HitPoints.maxHp, this.state._HitPoints.curHp);
+      this.state._HitPoints.curHp = Math.min(this.state._HitPoints.maxHp, this.state._HitPoints.curHp);
     },
     loseHp: function (amt){
       this.state._HitPoints.curHp -= amt*1;

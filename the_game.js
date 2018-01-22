@@ -15868,6 +15868,8 @@ var UIModePersistence = exports.UIModePersistence = function (_UIMode2) {
       this.game.fromJSON(state.GAME);
       for (var mapID in state.MAPS) {
         var mapData = JSON.parse(state.MAPS[mapID]);
+        console.log("mapload");
+        console.dir(mapData);
         _datastore.DATASTORE.MAPS[mapID] = (0, _map.MapMaker)(mapData); //mapData.xdim, mapData.ydim, mapData.setRngState);
         _datastore.DATASTORE.MAPS[mapID].build();
       }
@@ -15875,7 +15877,7 @@ var UIModePersistence = exports.UIModePersistence = function (_UIMode2) {
         _datastore.DATASTORE.ENTITIES[entID] = JSON.parse(state.ENTITIES[entID]);
         var ent = _entities.EntityFactory.create(_datastore.DATASTORE.ENTITIES[entID].name);
         if (_datastore.DATASTORE.ENTITIES[entID].name == 'avatar') {
-          this.game._mode.play._STATE.avatarID = ent.getId();
+          this.game._mode.play._STATE.avatarId = ent.getId();
         }
         _datastore.DATASTORE.MAPS[Object.keys(_datastore.DATASTORE.MAPS)[0]].addEntityAt(ent, _datastore.DATASTORE.ENTITIES[entID].x, _datastore.DATASTORE.ENTITIES[entID].y);
         delete _datastore.DATASTORE.ENTITIES[entID];
@@ -15947,7 +15949,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       for (var mossCount = 0; mossCount < 1; mossCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('moss'));
       }
-      for (var monsterCount = 0; monsterCount < 1; monsterCount++) {
+      for (var monsterCount = 0; monsterCount < 5; monsterCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('monster'));
       }
     }
@@ -16311,7 +16313,7 @@ var PlayerMessage = exports.PlayerMessage = {
   META: {
     mixinName: 'PlayerMessage',
     mixinGroupName: 'Messager',
-    stateNameSpace: '_PlayeMessage',
+    stateNameSpace: '_PlayerMessage',
     stateModel: {
       timeTaken: 0
     }
@@ -16321,7 +16323,7 @@ var PlayerMessage = exports.PlayerMessage = {
       _message.Message.send('can\'t move there because ' + evtData.reason);
     },
     'attacks': function attacks(evtData) {
-      console.log("attacked");
+      console.log(this.getName() + "attacked");
       _message.Message.send(this.getName() + " attacks " + evtData.target.getName());
     },
     'damages': function damages(evtData) {
@@ -16380,7 +16382,7 @@ var WalkerCorporeal = exports.WalkerCorporeal = {
       //TIME_ENGINE.unlock
       console.dir(_datastore.DATASTORE.MAPS[this.state.mapId]);
       var targetPositionInfo = this.getMap().getTargetPositionInfo(newX, newY);
-      if (targetPositionInfo.entity) {
+      if (targetPositionInfo.entity && targetPositionInfo.entity != this) {
         this.raiseMixinEvent('bumpEntity', { actor: this, target: targetPositionInfo.entity });
         return false;
       } else {
@@ -16429,7 +16431,7 @@ var HitPoints = exports.HitPoints = {
   METHODS: {
     gainHp: function gainHp(amt) {
       this.state._HitPoints.curHp += amt;
-      this.state._HitPoints.curHp - Math.min(this.state._HitPoints.maxHp, this.state._HitPoints.curHp);
+      this.state._HitPoints.curHp = Math.min(this.state._HitPoints.maxHp, this.state._HitPoints.curHp);
     },
     loseHp: function loseHp(amt) {
       this.state._HitPoints.curHp -= amt * 1;

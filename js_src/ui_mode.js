@@ -141,6 +141,8 @@ export class UIModePersistence extends UIMode{
     this.game.fromJSON(state.GAME);
     for (let mapID in state.MAPS){
       let mapData = JSON.parse(state.MAPS[mapID]);
+      console.log("mapload");
+      console.dir(mapData);
       DATASTORE.MAPS[mapID] = MapMaker(mapData); //mapData.xdim, mapData.ydim, mapData.setRngState);
       DATASTORE.MAPS[mapID].build();
     }
@@ -148,7 +150,7 @@ export class UIModePersistence extends UIMode{
       DATASTORE.ENTITIES[entID] = JSON.parse(state.ENTITIES[entID]);
       let ent = EntityFactory.create(DATASTORE.ENTITIES[entID].name);
       if (DATASTORE.ENTITIES[entID].name == 'avatar'){
-        this.game._mode.play._STATE.avatarID = ent.getId();
+        this.game._mode.play._STATE.avatarId = ent.getId();
       }
       DATASTORE.MAPS[Object.keys(DATASTORE.MAPS)[0]].addEntityAt(ent, DATASTORE.ENTITIES[entID].x, DATASTORE.ENTITIES[entID].y)
       delete DATASTORE.ENTITIES[entID];
@@ -206,7 +208,7 @@ export class UIModePlay extends UIMode {
     for(let mossCount = 0; mossCount<1; mossCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('moss'));
     }
-    for(let monsterCount = 0; monsterCount < 1;monsterCount++){
+    for(let monsterCount = 0; monsterCount < 5;monsterCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('monster'));
     }
   }
