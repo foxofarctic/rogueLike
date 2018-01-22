@@ -15949,7 +15949,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       for (var mossCount = 0; mossCount < 1; mossCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('moss'));
       }
-      for (var monsterCount = 0; monsterCount < 5; monsterCount++) {
+      for (var monsterCount = 0; monsterCount < 1; monsterCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('monster'));
       }
     }
@@ -16379,9 +16379,9 @@ var WalkerCorporeal = exports.WalkerCorporeal = {
       var newX = this.state.x * 1 + dx * 1;
       var newY = this.state.y * 1 + dy * 1;
 
-      //TIME_ENGINE.unlock
-      console.dir(_datastore.DATASTORE.MAPS[this.state.mapId]);
+      console.log("walking " + this.chr);
       var targetPositionInfo = this.getMap().getTargetPositionInfo(newX, newY);
+      console.dir(targetPositionInfo.entity);
       if (targetPositionInfo.entity && targetPositionInfo.entity != this) {
         this.raiseMixinEvent('bumpEntity', { actor: this, target: targetPositionInfo.entity });
         return false;

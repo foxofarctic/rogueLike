@@ -104,9 +104,9 @@ export let WalkerCorporeal = {
       let newX = this.state.x*1 + dx*1;
       let newY = this.state.y*1 + dy*1;
 
-      //TIME_ENGINE.unlock
-      console.dir(DATASTORE.MAPS[this.state.mapId]);
+      console.log("walking " + this.chr);
       let targetPositionInfo = this.getMap().getTargetPositionInfo(newX,newY);
+      console.dir(targetPositionInfo.entity);
       if (targetPositionInfo.entity && targetPositionInfo.entity != this){
         this.raiseMixinEvent('bumpEntity', {actor: this, target: targetPositionInfo.entity});
         return false;

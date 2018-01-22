@@ -208,7 +208,7 @@ export class UIModePlay extends UIMode {
     for(let mossCount = 0; mossCount<1; mossCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('moss'));
     }
-    for(let monsterCount = 0; monsterCount < 5;monsterCount++){
+    for(let monsterCount = 0; monsterCount < 1;monsterCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('monster'));
     }
   }
