@@ -233,6 +233,7 @@ export class UIModePlay extends UIMode {
     display.drawText(0, 3, "location: " + this.getAvatar().getX() + ", " + this.getAvatar().getY());
     display.drawText(0, 4, "Max HP: " + this.getAvatar().getMaxHp());
     display.drawText(0, 5, "Current HP: " + this.getAvatar().getHp());
+    display.drawText(0, 6, "Score: " + this.getAvatar().getScore());  
   }
 
   handleInput(inputType,inputData) {

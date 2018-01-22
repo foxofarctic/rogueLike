@@ -184,6 +184,11 @@ export let HitPoints = {
         this.raiseMixinEvent('killedBy',{src:evtData.src, target: evtData.target});
         evtData.src.raiseMixinEvent('killedBy',{src:evtData.src, target: evtData.target});
         console.log("destroy");
+        console.dir(evtData.src);
+        if(evtData.src.chr == "@"){
+          this.raiseMixinEvent('scoreEvent',{monsterHp: this.getMaxHp(), avatar: evtData.src});
+        }
+
         this.destroy();
       }
     }
@@ -373,6 +378,35 @@ export let RandomWalker = {
       this.actingState = true;
       //console.log(this.actingState);
       this.act();
+    }
+  }
+};
+
+export let Scorekeeper = {
+  META:{
+    mixinName: 'Scorekeeper',
+    mixinGroupName: 'Scorekeeper',
+    stateNameSpace: '_Scorekeeper',
+    stateModel: {
+      score: 0
+    },
+    // initialize: function(){
+    //   //do any initialization
+    // }
+  },
+  METHODS: {
+    getScore: function(){
+      return this.state._Scorekeeper.score;
+    },
+    addScore: function(amt){
+      this.state._Scorekeeper.score += amt;
+    }
+  },
+  LISTENERS: {
+    'scoreEvent': function(evtData) {
+      console.log("entering score event");
+      let bonus = evtData.monsterHp * 10;
+      evtData.avatar.addScore(bonus);
     }
   }
 };

@@ -15977,6 +15977,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       display.drawText(0, 3, "location: " + this.getAvatar().getX() + ", " + this.getAvatar().getY());
       display.drawText(0, 4, "Max HP: " + this.getAvatar().getMaxHp());
       display.drawText(0, 5, "Current HP: " + this.getAvatar().getHp());
+      display.drawText(0, 6, "Score: " + this.getAvatar().getScore());
     }
   }, {
     key: 'handleInput',
@@ -16258,7 +16259,7 @@ var TILES = exports.TILES = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.RandomWalker = exports.ActorWanderer = exports.ActorPlayer = exports.MeleeAttacker = exports.HitPoints = exports.WalkerCorporeal = exports.TimeTracker = exports.PlayerMessage = undefined;
+exports.Scorekeeper = exports.RandomWalker = exports.ActorWanderer = exports.ActorPlayer = exports.MeleeAttacker = exports.HitPoints = exports.WalkerCorporeal = exports.TimeTracker = exports.PlayerMessage = undefined;
 
 var _message = __webpack_require__(95);
 
@@ -16445,6 +16446,11 @@ var HitPoints = exports.HitPoints = {
         this.raiseMixinEvent('killedBy', { src: evtData.src, target: evtData.target });
         evtData.src.raiseMixinEvent('killedBy', { src: evtData.src, target: evtData.target });
         console.log("destroy");
+        console.dir(evtData.src);
+        if (evtData.src.chr == "@") {
+          this.raiseMixinEvent('scoreEvent', { monsterHp: this.getMaxHp(), avatar: evtData.src });
+        }
+
         this.destroy();
       }
     }
@@ -16644,6 +16650,35 @@ var RandomWalker = exports.RandomWalker = {
   }
 };
 
+var Scorekeeper = exports.Scorekeeper = {
+  META: {
+    mixinName: 'Scorekeeper',
+    mixinGroupName: 'Scorekeeper',
+    stateNameSpace: '_Scorekeeper',
+    stateModel: {
+      score: 0
+    }
+    // initialize: function(){
+    //   //do any initialization
+    // }
+  },
+  METHODS: {
+    getScore: function getScore() {
+      return this.state._Scorekeeper.score;
+    },
+    addScore: function addScore(amt) {
+      this.state._Scorekeeper.score += amt;
+    }
+  },
+  LISTENERS: {
+    'scoreEvent': function scoreEvent(evtData) {
+      console.log("entering score event");
+      var bonus = evtData.monsterHp * 10;
+      evtData.avatar.addScore(bonus);
+    }
+  }
+};
+
 /***/ }),
 /* 342 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -16668,7 +16703,7 @@ EntityFactory.learn({
   'name': 'avatar',
   'chr': '@',
   'fg': '#eb4',
-  'mixinNames': ['TimeTracker', 'WalkerCorporeal', 'PlayerMessage', 'HitPoints', 'MeleeAttacker', 'ActorPlayer'],
+  'mixinNames': ['TimeTracker', 'WalkerCorporeal', 'PlayerMessage', 'HitPoints', 'MeleeAttacker', 'ActorPlayer', 'Scorekeeper'],
   'maxHp': 10
 
 });
@@ -16677,7 +16712,7 @@ EntityFactory.learn({
   'name': 'moss',
   'chr': '#',
   'fg': '#3d5',
-  'mixinNames': ['HitPoints'],
+  'mixinNames': ['HitPoints', 'Scorekeeper'],
   'maxHp': 3
 
 });
@@ -16687,7 +16722,7 @@ EntityFactory.learn({
   'chr': '&',
   'fg': '#d63',
   'maxHp': 5,
-  'mixinNames': ['HitPoints', 'WalkerCorporeal', 'RandomWalker', 'ActorWanderer']
+  'mixinNames': ['HitPoints', 'WalkerCorporeal', 'RandomWalker', 'ActorWanderer', 'Scorekeeper']
 
 });
 
