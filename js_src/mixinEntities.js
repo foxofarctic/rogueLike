@@ -82,6 +82,7 @@ export let TimeTracker = {
       this.state._TimeTracker.timeTaken = t;
     },
     addTime: function(t){
+      console.log("Time: " + t);
       this.state._TimeTracker.timeTaken += t;
     }
   },
@@ -107,6 +108,10 @@ export let WalkerCorporeal = {
       console.log("walking " + this.chr);
       let targetPositionInfo = this.getMap().getTargetPositionInfo(newX,newY);
       console.dir(targetPositionInfo.entity);
+      if (targetPositionInfo.entity.chr == '%' && this.chr == '@'){
+        this.raiseMixinEvent('newLevel');
+        return false;
+      }
       if (targetPositionInfo.entity && targetPositionInfo.entity != this){
         this.raiseMixinEvent('bumpEntity', {actor: this, target: targetPositionInfo.entity});
         return false;
@@ -238,13 +243,15 @@ export let ActorPlayer = {
     stateModel: {
       baseActionDuration: 1000,
       actingState: false,
-      currentActionDuration: 1000
+      currentActionDuration: 1000,
+      newLevel: false
     },
 
     initialize: function(){
       console.log("initialize Player Actor");
       SCHEDULER.add(this,true,1);
       TIME_ENGINE.lock();
+      //let newLevel = false;
     }
   },
 
@@ -267,8 +274,12 @@ export let ActorPlayer = {
       }
       return this.state._ActorPlayer.actingState;
     },
-
-
+    getNewLevel: function(){
+      return this.state._ActorPlayer.newLevel;
+    },
+    setNewLevel: function(bool){
+      this.state._ActorPlayer.newLevel = bool;
+    },
     act: function(){
       if (this.isActing()) {
         return;
@@ -292,7 +303,11 @@ export let ActorPlayer = {
       setTimeout(function(){ TIME_ENGINE.unlock();},1);
       console.log("Player still working");
       //this.act();
+    },
+    'newLevel': function(){
+      this.state._ActorPlayer.newLevel = true;
     }
+
   }
 };
 

@@ -32,3 +32,10 @@ EntityFactory.learn({
 
 
   });
+
+  EntityFactory.learn({
+    'name': 'portal',
+    'chr': '%',
+    'fg': '#00CED1',
+    'mixinNames': []
+  });

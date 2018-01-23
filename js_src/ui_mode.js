@@ -205,10 +205,42 @@ export class UIModePlay extends UIMode {
     m.addEntityAtRandomPosition(a);
     this.moveCameraToAvatar();
 
+    for(let portalCount = 0; portalCount<1; portalCount++){
+      m.addEntityAtRandomPosition(EntityFactory.create('portal'));
+    }
     for(let mossCount = 0; mossCount<1; mossCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('moss'));
     }
     for(let monsterCount = 0; monsterCount < 1;monsterCount++){
+      m.addEntityAtRandomPosition(EntityFactory.create('monster'));
+    }
+  }
+
+  startNewLevel(avatar) {
+    //initTiming();
+    //this._STATE = {};
+    let m = MapMaker({xdim:20,ydim:20});
+    //m.build();
+    this._STATE.curMapId = m.getId();
+    this._STATE.cameraMapLoc = {
+      x: Math.round(m.getXDim()/2),
+      y: Math.round(m.getYDim()/2)
+    };
+    this._STATE.cameraDisplayLoc = {
+      x: Math.round(this.display.getOptions().width/2),
+      y: Math.round(this.display.getOptions().height/2)
+    };
+
+    //DisplaySymbol({'name': 'avatar', 'chr':'@', 'fg' '#eb4'});
+    //let a = EntityFactory.create('avatar');
+    this._STATE.avatarId = avatar.getId();
+    m.addEntityAtRandomPosition(avatar);
+    this.moveCameraToAvatar();
+
+    for(let mossCount = 0; mossCount<5; mossCount++){
+      m.addEntityAtRandomPosition(EntityFactory.create('moss'));
+    }
+    for(let monsterCount = 0; monsterCount < 5;monsterCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('monster'));
     }
   }
@@ -277,7 +309,10 @@ export class UIModePlay extends UIMode {
    if (avatarMoved) {
      this.moveCameraToAvatar();
    }
-
+   if (DATASTORE.ENTITIES[this._STATE.avatarId].getNewLevel()){
+     DATASTORE.ENTITIES[this._STATE.avatarId].setNewLevel(false);
+     this.startNewLevel(DATASTORE.ENTITIES[this._STATE.avatarId]);
+   }
    //this.checkGameWinLose();
    return true;
 }
