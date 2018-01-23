@@ -108,8 +108,12 @@ export let WalkerCorporeal = {
       console.log("walking " + this.chr);
       let targetPositionInfo = this.getMap().getTargetPositionInfo(newX,newY);
       console.dir(targetPositionInfo.entity);
-      if (targetPositionInfo.entity.chr == '%' && this.chr == '@'){
+      if (targetPositionInfo.entity.chr == '0' && this.chr == '@'){
         this.raiseMixinEvent('newLevel');
+        return false;
+      }
+      if (targetPositionInfo.entity.chr == '*' && this.chr == '@'){
+        this.setWin(true);
         return false;
       }
       if (targetPositionInfo.entity && targetPositionInfo.entity != this){
@@ -244,7 +248,8 @@ export let ActorPlayer = {
       baseActionDuration: 1000,
       actingState: false,
       currentActionDuration: 1000,
-      newLevel: false
+      newLevel: false,
+      win: false
     },
 
     initialize: function(){
@@ -274,12 +279,10 @@ export let ActorPlayer = {
       }
       return this.state._ActorPlayer.actingState;
     },
-    getNewLevel: function(){
-      return this.state._ActorPlayer.newLevel;
-    },
-    setNewLevel: function(bool){
-      this.state._ActorPlayer.newLevel = bool;
-    },
+    getNewLevel: function(){return this.state._ActorPlayer.newLevel;},
+    setNewLevel: function(bool){ this.state._ActorPlayer.newLevel = bool;},
+    setWin: function(bool){this.state._ActorPlayer.win = bool;},
+    getWin: function(){return this.state._ActorPlayer.win},
     act: function(){
       if (this.isActing()) {
         return;

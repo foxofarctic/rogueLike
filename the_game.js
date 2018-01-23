@@ -15930,6 +15930,10 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       this._STATE = {};
       var m = (0, _map.MapMaker)({ xdim: 20, ydim: 20 });
       //m.build();
+      this._STATE.newXDim = 20;
+      this._STATE.newYDim = 20;
+      this._STATE.level = 1;
+
       this._STATE.curMapId = m.getId();
       this._STATE.cameraMapLoc = {
         x: Math.round(m.getXDim() / 2),
@@ -15946,22 +15950,24 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       m.addEntityAtRandomPosition(a);
       this.moveCameraToAvatar();
 
-      for (var portalCount = 0; portalCount < 1; portalCount++) {
-        m.addEntityAtRandomPosition(_entities.EntityFactory.create('portal'));
-      }
       for (var mossCount = 0; mossCount < 1; mossCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('moss'));
       }
       for (var monsterCount = 0; monsterCount < 1; monsterCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('monster'));
       }
+      //for(let portalCount = 0; portalCount<1; portalCount++){
+      m.addEntityAtRandomPosition(_entities.EntityFactory.create('portal'));
+      //  }
     }
   }, {
     key: 'startNewLevel',
-    value: function startNewLevel(avatar) {
+    value: function startNewLevel(avatar, x, y, level) {
       //initTiming();
-      //this._STATE = {};
-      var m = (0, _map.MapMaker)({ xdim: 20, ydim: 20 });
+      //this._STATE = {};0
+      // x = 20 + x;
+      // y = 20 + y;
+      var m = (0, _map.MapMaker)({ xdim: x, ydim: y });
       //m.build();
       this._STATE.curMapId = m.getId();
       this._STATE.cameraMapLoc = {
@@ -15979,11 +15985,16 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       m.addEntityAtRandomPosition(avatar);
       this.moveCameraToAvatar();
 
-      for (var mossCount = 0; mossCount < 5; mossCount++) {
+      for (var mossCount = 0; mossCount < 5 * level; mossCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('moss'));
       }
-      for (var monsterCount = 0; monsterCount < 5; monsterCount++) {
+      for (var monsterCount = 0; monsterCount < 5 * level; monsterCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('monster'));
+      }
+      if (level < 3) {
+        m.addEntityAtRandomPosition(_entities.EntityFactory.create('portal'));
+      } else {
+        m.addEntityAtRandomPosition(_entities.EntityFactory.create('finish'));
       }
     }
   }, {
@@ -16054,8 +16065,14 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
         this.moveCameraToAvatar();
       }
       if (_datastore.DATASTORE.ENTITIES[this._STATE.avatarId].getNewLevel()) {
+        this._STATE.newXDim = this._STATE.newXDim + 10;
+        this._STATE.newYDim = this._STATE.newYDim + 10;
+        this._STATE.level++;
         _datastore.DATASTORE.ENTITIES[this._STATE.avatarId].setNewLevel(false);
-        this.startNewLevel(_datastore.DATASTORE.ENTITIES[this._STATE.avatarId]);
+        this.startNewLevel(_datastore.DATASTORE.ENTITIES[this._STATE.avatarId], this._STATE.newXDim, this._STATE.newYDim, this._STATE.level);
+      }
+      if (_datastore.DATASTORE.ENTITIES[this._STATE.avatarId].getWin()) {
+        this.game.switchMode('win');
       }
       //this.checkGameWinLose();
       return true;
@@ -16177,8 +16194,13 @@ var UIModeWin = exports.UIModeWin = function (_UIMode6) {
     value: function render() {
       this.display.drawText(1, 1, "game win", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 3, "you WIN!!", _color.Color.FG, _color.Color.BG);
+      //this.display.drawText(1, 4, "Score: " + this.getAvatar().getScore());
+      //this.display.drawText(1, 5, "time: " + this.getAvatar().getTime());
       _message.Message.send("entering " + this.constructor.name);
     }
+  }, {
+    key: 'renderAvatar',
+    value: function renderAvatar() {}
   }]);
 
   return UIModeWin;
@@ -16419,8 +16441,12 @@ var WalkerCorporeal = exports.WalkerCorporeal = {
       console.log("walking " + this.chr);
       var targetPositionInfo = this.getMap().getTargetPositionInfo(newX, newY);
       console.dir(targetPositionInfo.entity);
-      if (targetPositionInfo.entity.chr == '%' && this.chr == '@') {
+      if (targetPositionInfo.entity.chr == '0' && this.chr == '@') {
         this.raiseMixinEvent('newLevel');
+        return false;
+      }
+      if (targetPositionInfo.entity.chr == '*' && this.chr == '@') {
+        this.setWin(true);
         return false;
       }
       if (targetPositionInfo.entity && targetPositionInfo.entity != this) {
@@ -16556,7 +16582,8 @@ var ActorPlayer = exports.ActorPlayer = {
       baseActionDuration: 1000,
       actingState: false,
       currentActionDuration: 1000,
-      newLevel: false
+      newLevel: false,
+      win: false
     },
 
     initialize: function initialize() {
@@ -16591,6 +16618,12 @@ var ActorPlayer = exports.ActorPlayer = {
     },
     setNewLevel: function setNewLevel(bool) {
       this.state._ActorPlayer.newLevel = bool;
+    },
+    setWin: function setWin(bool) {
+      this.state._ActorPlayer.win = bool;
+    },
+    getWin: function getWin() {
+      return this.state._ActorPlayer.win;
     },
     act: function act() {
       if (this.isActing()) {
@@ -16809,8 +16842,15 @@ EntityFactory.learn({
 
 EntityFactory.learn({
   'name': 'portal',
-  'chr': '%',
+  'chr': '0',
   'fg': '#00CED1',
+  'mixinNames': []
+});
+
+EntityFactory.learn({
+  'name': 'finish',
+  'chr': '*',
+  'fg': '#F5F522',
   'mixinNames': []
 });
 

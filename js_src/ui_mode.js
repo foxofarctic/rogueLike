@@ -182,6 +182,7 @@ export class UIModePlay extends UIMode {
     this.game.isPlaying = true;
     setKeyBinding(['play','movement_numpad']);
     TIME_ENGINE.unlock();
+
   }
 
   startNewGame() {
@@ -189,6 +190,10 @@ export class UIModePlay extends UIMode {
     this._STATE = {};
     let m = MapMaker({xdim:20,ydim:20});
     //m.build();
+    this._STATE.newXDim = 20;
+    this._STATE.newYDim = 20;
+    this._STATE.level = 1;
+
     this._STATE.curMapId = m.getId();
     this._STATE.cameraMapLoc = {
       x: Math.round(m.getXDim()/2),
@@ -205,21 +210,23 @@ export class UIModePlay extends UIMode {
     m.addEntityAtRandomPosition(a);
     this.moveCameraToAvatar();
 
-    for(let portalCount = 0; portalCount<1; portalCount++){
-      m.addEntityAtRandomPosition(EntityFactory.create('portal'));
-    }
     for(let mossCount = 0; mossCount<1; mossCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('moss'));
     }
     for(let monsterCount = 0; monsterCount < 1;monsterCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('monster'));
     }
+    //for(let portalCount = 0; portalCount<1; portalCount++){
+    m.addEntityAtRandomPosition(EntityFactory.create('portal'));
+  //  }
   }
 
-  startNewLevel(avatar) {
+  startNewLevel(avatar, x, y, level) {
     //initTiming();
-    //this._STATE = {};
-    let m = MapMaker({xdim:20,ydim:20});
+    //this._STATE = {};0
+    // x = 20 + x;
+    // y = 20 + y;
+    let m = MapMaker({xdim: x,ydim: y});
     //m.build();
     this._STATE.curMapId = m.getId();
     this._STATE.cameraMapLoc = {
@@ -237,11 +244,16 @@ export class UIModePlay extends UIMode {
     m.addEntityAtRandomPosition(avatar);
     this.moveCameraToAvatar();
 
-    for(let mossCount = 0; mossCount<5; mossCount++){
+    for(let mossCount = 0; mossCount< (5*level) ; mossCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('moss'));
     }
-    for(let monsterCount = 0; monsterCount < 5;monsterCount++){
+    for(let monsterCount = 0; monsterCount < (5*level);monsterCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('monster'));
+    }
+    if (level < 3){
+      m.addEntityAtRandomPosition(EntityFactory.create('portal'));
+    } else {
+      m.addEntityAtRandomPosition(EntityFactory.create('finish'));
     }
   }
 
@@ -310,8 +322,14 @@ export class UIModePlay extends UIMode {
      this.moveCameraToAvatar();
    }
    if (DATASTORE.ENTITIES[this._STATE.avatarId].getNewLevel()){
+     this._STATE.newXDim = this._STATE.newXDim + 10;
+     this._STATE.newYDim = this._STATE.newYDim + 10;
+     this._STATE.level++;
      DATASTORE.ENTITIES[this._STATE.avatarId].setNewLevel(false);
-     this.startNewLevel(DATASTORE.ENTITIES[this._STATE.avatarId]);
+     this.startNewLevel(DATASTORE.ENTITIES[this._STATE.avatarId], this._STATE.newXDim, this._STATE.newYDim, this._STATE.level );
+   }
+   if( DATASTORE.ENTITIES[this._STATE.avatarId].getWin() ){
+     this.game.switchMode('win');
    }
    //this.checkGameWinLose();
    return true;
@@ -386,8 +404,12 @@ export class UIModeWin extends UIMode {
   render() {
     this.display.drawText(1,1,"game win", Color.FG,Color.BG);
     this.display.drawText(1,3,"you WIN!!", Color.FG,Color.BG);
+    //this.display.drawText(1, 4, "Score: " + this.getAvatar().getScore());
+    //this.display.drawText(1, 5, "time: " + this.getAvatar().getTime());
     Message.send("entering " + this.constructor.name);
   }
+
+  renderAvatar(){}
 }
 
 
