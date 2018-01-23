@@ -48,7 +48,7 @@ export let PlayerMessage = {
       Message.send('can\'t move there because ' + evtData.reason);
     },
     'attacks': function(evtData){
-      console.log(this.getName() + "attacked");
+      console.log(evtData.target.getName() + "attacked");
       Message.send(this.getName()+" attacks "+evtData.target.getName());
     },
     'damages': function(evtData){
@@ -82,7 +82,7 @@ export let TimeTracker = {
       this.state._TimeTracker.timeTaken = t;
     },
     addTime: function(t){
-      console.log("Time: " + t);
+      //console.log("Time: " + t);
       this.state._TimeTracker.timeTaken += t;
     }
   },
@@ -110,15 +110,19 @@ export let WalkerCorporeal = {
       console.dir(targetPositionInfo.entity);
       if (targetPositionInfo.entity.chr == '0' && this.chr == '@'){
         this.raiseMixinEvent('newLevel');
-        return false;
+        return true;
       }
       if (targetPositionInfo.entity.chr == '*' && this.chr == '@'){
         this.setWin(true);
         return false;
       }
-      if (targetPositionInfo.entity && targetPositionInfo.entity != this){
+      // if (targetPositionInfo.entity && targetPositionInfo.entity.chr != this.chr){
+      if (targetPositionInfo.entity){//&& targetPositionInfo.entity.chr != this.chr){
+
         this.raiseMixinEvent('bumpEntity', {actor: this, target: targetPositionInfo.entity});
-        return false;
+        console.log(targetPositionInfo.entity.chr + " bumped by " + this.chr);
+        this.raiseMixinEvent('actionDone');
+        return true;
       } else {
         if(targetPositionInfo.tile.isImpassable()){
           this.raiseMixinEvent('wallBlocked',{reason:"there is a wall in the way"})
@@ -230,6 +234,7 @@ export let MeleeAttacker = {
   },
   LISTENERS: {
     'bumpEntity': function(evtData) {
+      console.log("bumped entity");
       evtData.target.raiseMixinEvent('damaged',{src:this,damageAmount:this.getMeleeDamage(), target: evtData.target});
 //      evtData.target.raiseMixinEvent('damaged',{src:evtData.target,damageAmount:this.getMeleeDamage(), target: this});
 
@@ -314,7 +319,7 @@ export let ActorPlayer = {
   }
 };
 
-
+//*******************************
 export let ActorWanderer = {
   META: {
     mixInName:'ActorWanderer',
@@ -369,56 +374,7 @@ export let ActorWanderer = {
   }
 };
 
-// //*************************************
-// export let RandomWalker = {
-//   META: {
-//     mixinName: 'RandomWalker',
-//     mixinGroupName: 'Actor',
-//     stateNamespace: '_RandomWalker',
-//     stateModel: {
-//       actingState: false,
-//     },
-//     initialize: function(template){
-//       console.log("RandomWalker initialized");
-//       SCHEDULER.add(this, true);
-//     }
-//   },
-//   METHODS: {
-//     act: function(){
-//       console.log("enemy now moving");
-//       if(this.actingState == false){
-//         return;
-//       }
-//       //console.log("walker is acting");
-//       //Rand number from -1 to 1
-//       let dx = ROT.RNG.getUniformInt(-1, 1);
-//       //console.log(dx);
-//       let dy = ROT.RNG.getUniformInt(-1, 1);
-//       if (dx == 0 && dy == 0) {
-//         dy = 1;
-//       }
-//       //console.log(dy);
-//       this.raiseMixinEvent('tryWalking', { 'dx': dx, 'dy': dy});
-//       this.actingState = false;
-//       //this.raiseMixinEvent('actionDone');
-//     }
-//   },
-//   LISTENERS: {
-//     'killedBy': function(evtData){
-//       // Message.send(this.getName() + " died");
-//       SCHEDULER.remove(this);
-//       // this.destroy();
-//     }//,
-//     // 'enemyTurn': function() {
-//     //   console.log("enemy turn");
-//     //
-//     //   this.actingState = true;
-//     //   //console.log(this.actingState);
-//     //   this.act();
-//     // }
-//   }
-// };
-
+//*********************************
 export let Scorekeeper = {
   META:{
     mixinName: 'Scorekeeper',
@@ -447,3 +403,66 @@ export let Scorekeeper = {
     }
   }
 };
+
+// export let ActorAttacker = {
+//   META: {
+//     mixInName:'ActorAttacker',
+//     mixInGroupName: 'ActorAttacker',
+//     stateNameSpace: '_ActorAttacker',
+//     stateModel: {
+//       baseActionDuration: 1000,
+//       actingState: false,
+//       currentActionDuration: 1000
+//     },
+//
+//     initialize: function(template){
+//       SCHEDULER.add(this,true,randomInt(2,this.getBaseActionDuration()));
+//       this.state._ActorAttacker.baseActionDuration = template.attackerActionDuration || 1000;
+//       this.state._ActorAttacker.currentActionDuration = this.state._ActorAttacker.baseActionDuration;
+//     }
+//   },
+//
+//   METHODS: {
+//     getBaseActionDuration: function () {
+//       return this.state._ActorAttacker.baseActionDuration;
+//     },
+//     setBaseActionDuration: function (newValue) {
+//       this.state._ActorAttacker.baseActionDuration = newValue;
+//     },
+//     getCurrentActionDuration: function () {
+//       return this.state._ActorAttacker.currentActionDuration;
+//     },
+//     setCurrentActionDuration: function (newValue) {
+//       this.state._ActorAttacker.currentActionDuration = newValue;
+//     },
+//     act: function(){
+//       TIME_ENGINE.lock();
+//       for(let dx = -1 *1; dx<2; dx++ ){
+//         for(let dy = -1 *1; dy<2; dy++ ){
+//           let targetPositionInfo = this.getMap().getTargetPositionInfo(dx,dy);
+//           if (targetPositionInfo.entity && dx !=0 $$ dy == 0){
+//             this.raiseMixinEvent('tryWalking',{'dx':dx, 'dy':dy});
+//             return;
+//           }
+//         }
+//       }
+//       dx = randomInt(-1,1);
+//       dy = randomInt(-1,1);
+//       this.raiseMixinEvent('tryWalking',{'dx':dx, 'dy':dy});
+//       // SCHEDULER.setDuration(1000);
+//       // TIME_ENGINE.unlock();
+//     }
+//   },
+//
+//   LISTENERS: {
+//     // 'killedBy': function(){
+//     //   SCHEDULER.remove(this);
+//     // },
+//     'actionDone': function(){
+//       SCHEDULER.setDuration(this.getCurrentActionDuration());
+//       this.setCurrentActionDuration(this.getBaseActionDuration()+randomInt(-5,5));
+//       setTimeout(function(){ TIME_ENGINE.unlock();},1);
+//       console.log("Attacker still working");
+//     }
+//   }
+// };

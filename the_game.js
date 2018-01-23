@@ -15953,7 +15953,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       for (var mossCount = 0; mossCount < 1; mossCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('moss'));
       }
-      for (var monsterCount = 0; monsterCount < 1; monsterCount++) {
+      for (var monsterCount = 0; monsterCount < 25; monsterCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('monster'));
       }
       //for(let portalCount = 0; portalCount<1; portalCount++){
@@ -16057,8 +16057,9 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       } else if (gameCommand == _command.COMMAND.MOVE_D) {
         avatarMoved = this.moveAvatar(0, 1);
       } else if (gameCommand == _command.COMMAND.REST) {
-        avatarMoved = this.moveAvatar(0, 0);
-        _datastore.DATASTORE.ENTITIES[this._STATE.avatarId].gainHp(1);
+        //avatarMoved = this.moveAvatar(0,0);
+        this.getAvatar().raiseMixinEvent('actionDone');
+        //DATASTORE.ENTITIES[this._STATE.avatarId].gainHp(1);
       }
 
       if (avatarMoved) {
@@ -16381,7 +16382,7 @@ var PlayerMessage = exports.PlayerMessage = {
       _message.Message.send('can\'t move there because ' + evtData.reason);
     },
     'attacks': function attacks(evtData) {
-      console.log(this.getName() + "attacked");
+      console.log(evtData.target.getName() + "attacked");
       _message.Message.send(this.getName() + " attacks " + evtData.target.getName());
     },
     'damages': function damages(evtData) {
@@ -16415,7 +16416,7 @@ var TimeTracker = exports.TimeTracker = {
       this.state._TimeTracker.timeTaken = t;
     },
     addTime: function addTime(t) {
-      console.log("Time: " + t);
+      //console.log("Time: " + t);
       this.state._TimeTracker.timeTaken += t;
     }
   },
@@ -16443,15 +16444,20 @@ var WalkerCorporeal = exports.WalkerCorporeal = {
       console.dir(targetPositionInfo.entity);
       if (targetPositionInfo.entity.chr == '0' && this.chr == '@') {
         this.raiseMixinEvent('newLevel');
-        return false;
+        return true;
       }
       if (targetPositionInfo.entity.chr == '*' && this.chr == '@') {
         this.setWin(true);
         return false;
       }
-      if (targetPositionInfo.entity && targetPositionInfo.entity != this) {
+      // if (targetPositionInfo.entity && targetPositionInfo.entity.chr != this.chr){
+      if (targetPositionInfo.entity) {
+        //&& targetPositionInfo.entity.chr != this.chr){
+
         this.raiseMixinEvent('bumpEntity', { actor: this, target: targetPositionInfo.entity });
-        return false;
+        console.log(targetPositionInfo.entity.chr + " bumped by " + this.chr);
+        this.raiseMixinEvent('actionDone');
+        return true;
       } else {
         if (targetPositionInfo.tile.isImpassable()) {
           this.raiseMixinEvent('wallBlocked', { reason: "there is a wall in the way" });
@@ -16564,6 +16570,7 @@ var MeleeAttacker = exports.MeleeAttacker = {
   },
   LISTENERS: {
     'bumpEntity': function bumpEntity(evtData) {
+      console.log("bumped entity");
       evtData.target.raiseMixinEvent('damaged', { src: this, damageAmount: this.getMeleeDamage(), target: evtData.target });
       //      evtData.target.raiseMixinEvent('damaged',{src:evtData.target,damageAmount:this.getMeleeDamage(), target: this});
 
@@ -16658,6 +16665,7 @@ var ActorPlayer = exports.ActorPlayer = {
   }
 };
 
+//*******************************
 var ActorWanderer = exports.ActorWanderer = {
   META: {
     mixInName: 'ActorWanderer',
@@ -16714,56 +16722,7 @@ var ActorWanderer = exports.ActorWanderer = {
   }
 };
 
-// //*************************************
-// export let RandomWalker = {
-//   META: {
-//     mixinName: 'RandomWalker',
-//     mixinGroupName: 'Actor',
-//     stateNamespace: '_RandomWalker',
-//     stateModel: {
-//       actingState: false,
-//     },
-//     initialize: function(template){
-//       console.log("RandomWalker initialized");
-//       SCHEDULER.add(this, true);
-//     }
-//   },
-//   METHODS: {
-//     act: function(){
-//       console.log("enemy now moving");
-//       if(this.actingState == false){
-//         return;
-//       }
-//       //console.log("walker is acting");
-//       //Rand number from -1 to 1
-//       let dx = ROT.RNG.getUniformInt(-1, 1);
-//       //console.log(dx);
-//       let dy = ROT.RNG.getUniformInt(-1, 1);
-//       if (dx == 0 && dy == 0) {
-//         dy = 1;
-//       }
-//       //console.log(dy);
-//       this.raiseMixinEvent('tryWalking', { 'dx': dx, 'dy': dy});
-//       this.actingState = false;
-//       //this.raiseMixinEvent('actionDone');
-//     }
-//   },
-//   LISTENERS: {
-//     'killedBy': function(evtData){
-//       // Message.send(this.getName() + " died");
-//       SCHEDULER.remove(this);
-//       // this.destroy();
-//     }//,
-//     // 'enemyTurn': function() {
-//     //   console.log("enemy turn");
-//     //
-//     //   this.actingState = true;
-//     //   //console.log(this.actingState);
-//     //   this.act();
-//     // }
-//   }
-// };
-
+//*********************************
 var Scorekeeper = exports.Scorekeeper = {
   META: {
     mixinName: 'Scorekeeper',
@@ -16792,6 +16751,69 @@ var Scorekeeper = exports.Scorekeeper = {
     }
   }
 };
+
+// export let ActorAttacker = {
+//   META: {
+//     mixInName:'ActorAttacker',
+//     mixInGroupName: 'ActorAttacker',
+//     stateNameSpace: '_ActorAttacker',
+//     stateModel: {
+//       baseActionDuration: 1000,
+//       actingState: false,
+//       currentActionDuration: 1000
+//     },
+//
+//     initialize: function(template){
+//       SCHEDULER.add(this,true,randomInt(2,this.getBaseActionDuration()));
+//       this.state._ActorAttacker.baseActionDuration = template.attackerActionDuration || 1000;
+//       this.state._ActorAttacker.currentActionDuration = this.state._ActorAttacker.baseActionDuration;
+//     }
+//   },
+//
+//   METHODS: {
+//     getBaseActionDuration: function () {
+//       return this.state._ActorAttacker.baseActionDuration;
+//     },
+//     setBaseActionDuration: function (newValue) {
+//       this.state._ActorAttacker.baseActionDuration = newValue;
+//     },
+//     getCurrentActionDuration: function () {
+//       return this.state._ActorAttacker.currentActionDuration;
+//     },
+//     setCurrentActionDuration: function (newValue) {
+//       this.state._ActorAttacker.currentActionDuration = newValue;
+//     },
+//     act: function(){
+//       TIME_ENGINE.lock();
+//       for(let dx = -1 *1; dx<2; dx++ ){
+//         for(let dy = -1 *1; dy<2; dy++ ){
+//           let targetPositionInfo = this.getMap().getTargetPositionInfo(dx,dy);
+//           if (targetPositionInfo.entity && dx !=0 $$ dy == 0){
+//             this.raiseMixinEvent('tryWalking',{'dx':dx, 'dy':dy});
+//             return;
+//           }
+//         }
+//       }
+//       dx = randomInt(-1,1);
+//       dy = randomInt(-1,1);
+//       this.raiseMixinEvent('tryWalking',{'dx':dx, 'dy':dy});
+//       // SCHEDULER.setDuration(1000);
+//       // TIME_ENGINE.unlock();
+//     }
+//   },
+//
+//   LISTENERS: {
+//     // 'killedBy': function(){
+//     //   SCHEDULER.remove(this);
+//     // },
+//     'actionDone': function(){
+//       SCHEDULER.setDuration(this.getCurrentActionDuration());
+//       this.setCurrentActionDuration(this.getBaseActionDuration()+randomInt(-5,5));
+//       setTimeout(function(){ TIME_ENGINE.unlock();},1);
+//       console.log("Attacker still working");
+//     }
+//   }
+// };
 
 /***/ }),
 /* 342 */
@@ -16836,7 +16858,7 @@ EntityFactory.learn({
   'chr': '&',
   'fg': '#d63',
   'maxHp': 5,
-  'mixinNames': ['HitPoints', 'WalkerCorporeal', 'ActorWanderer', 'Scorekeeper']
+  'mixinNames': ['HitPoints', 'WalkerCorporeal', 'ActorWanderer', 'Scorekeeper', 'MeleeAttacker']
 
 });
 

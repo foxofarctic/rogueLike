@@ -213,7 +213,7 @@ export class UIModePlay extends UIMode {
     for(let mossCount = 0; mossCount<1; mossCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('moss'));
     }
-    for(let monsterCount = 0; monsterCount < 1;monsterCount++){
+    for(let monsterCount = 0; monsterCount < 25;monsterCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('monster'));
     }
     //for(let portalCount = 0; portalCount<1; portalCount++){
@@ -314,8 +314,9 @@ export class UIModePlay extends UIMode {
      avatarMoved = this.moveAvatar(0,1);
    } else
    if (gameCommand == COMMAND.REST){
-     avatarMoved = this.moveAvatar(0,0);
-     DATASTORE.ENTITIES[this._STATE.avatarId].gainHp(1);
+     //avatarMoved = this.moveAvatar(0,0);
+     this.getAvatar().raiseMixinEvent('actionDone');
+     //DATASTORE.ENTITIES[this._STATE.avatarId].gainHp(1);
    }
 
    if (avatarMoved) {
