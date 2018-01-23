@@ -15953,7 +15953,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       for (var mossCount = 0; mossCount < 1; mossCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('moss'));
       }
-      for (var monsterCount = 0; monsterCount < 1; monsterCount++) {
+      for (var monsterCount = 0; monsterCount < 4; monsterCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('monster'));
       }
       //for(let portalCount = 0; portalCount<1; portalCount++){
