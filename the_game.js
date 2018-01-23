@@ -15953,7 +15953,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       for (var mossCount = 0; mossCount < 1; mossCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('moss'));
       }
-      for (var monsterCount = 0; monsterCount < 25; monsterCount++) {
+      for (var monsterCount = 0; monsterCount < 1; monsterCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('monster'));
       }
       //for(let portalCount = 0; portalCount<1; portalCount++){
@@ -16324,7 +16324,7 @@ var TILES = exports.TILES = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Scorekeeper = exports.ActorWanderer = exports.ActorPlayer = exports.MeleeAttacker = exports.HitPoints = exports.WalkerCorporeal = exports.TimeTracker = exports.PlayerMessage = undefined;
+exports.ActorAttacker = exports.Scorekeeper = exports.ActorWanderer = exports.ActorPlayer = exports.MeleeAttacker = exports.HitPoints = exports.WalkerCorporeal = exports.TimeTracker = exports.PlayerMessage = undefined;
 
 var _message = __webpack_require__(96);
 
@@ -16439,9 +16439,9 @@ var WalkerCorporeal = exports.WalkerCorporeal = {
       var newX = this.state.x * 1 + dx * 1;
       var newY = this.state.y * 1 + dy * 1;
 
-      console.log("walking " + this.chr);
+      //console.log("walking " + this.chr);
       var targetPositionInfo = this.getMap().getTargetPositionInfo(newX, newY);
-      console.dir(targetPositionInfo.entity);
+      //  console.dir(targetPositionInfo.entity);
       if (targetPositionInfo.entity.chr == '0' && this.chr == '@') {
         this.raiseMixinEvent('newLevel');
         return true;
@@ -16752,68 +16752,79 @@ var Scorekeeper = exports.Scorekeeper = {
   }
 };
 
-// export let ActorAttacker = {
-//   META: {
-//     mixInName:'ActorAttacker',
-//     mixInGroupName: 'ActorAttacker',
-//     stateNameSpace: '_ActorAttacker',
-//     stateModel: {
-//       baseActionDuration: 1000,
-//       actingState: false,
-//       currentActionDuration: 1000
-//     },
-//
-//     initialize: function(template){
-//       SCHEDULER.add(this,true,randomInt(2,this.getBaseActionDuration()));
-//       this.state._ActorAttacker.baseActionDuration = template.attackerActionDuration || 1000;
-//       this.state._ActorAttacker.currentActionDuration = this.state._ActorAttacker.baseActionDuration;
-//     }
-//   },
-//
-//   METHODS: {
-//     getBaseActionDuration: function () {
-//       return this.state._ActorAttacker.baseActionDuration;
-//     },
-//     setBaseActionDuration: function (newValue) {
-//       this.state._ActorAttacker.baseActionDuration = newValue;
-//     },
-//     getCurrentActionDuration: function () {
-//       return this.state._ActorAttacker.currentActionDuration;
-//     },
-//     setCurrentActionDuration: function (newValue) {
-//       this.state._ActorAttacker.currentActionDuration = newValue;
-//     },
-//     act: function(){
-//       TIME_ENGINE.lock();
-//       for(let dx = -1 *1; dx<2; dx++ ){
-//         for(let dy = -1 *1; dy<2; dy++ ){
-//           let targetPositionInfo = this.getMap().getTargetPositionInfo(dx,dy);
-//           if (targetPositionInfo.entity && dx !=0 $$ dy == 0){
-//             this.raiseMixinEvent('tryWalking',{'dx':dx, 'dy':dy});
-//             return;
-//           }
-//         }
-//       }
-//       dx = randomInt(-1,1);
-//       dy = randomInt(-1,1);
-//       this.raiseMixinEvent('tryWalking',{'dx':dx, 'dy':dy});
-//       // SCHEDULER.setDuration(1000);
-//       // TIME_ENGINE.unlock();
-//     }
-//   },
-//
-//   LISTENERS: {
-//     // 'killedBy': function(){
-//     //   SCHEDULER.remove(this);
-//     // },
-//     'actionDone': function(){
-//       SCHEDULER.setDuration(this.getCurrentActionDuration());
-//       this.setCurrentActionDuration(this.getBaseActionDuration()+randomInt(-5,5));
-//       setTimeout(function(){ TIME_ENGINE.unlock();},1);
-//       console.log("Attacker still working");
-//     }
-//   }
-// };
+var ActorAttacker = exports.ActorAttacker = {
+  META: {
+    mixInName: 'ActorAttacker',
+    mixInGroupName: 'ActorAttacker',
+    stateNameSpace: '_ActorAttacker',
+    stateModel: {
+      baseActionDuration: 1000,
+      actingState: false,
+      currentActionDuration: 1000
+    },
+
+    initialize: function initialize(template) {
+      _timing.SCHEDULER.add(this, true, (0, _util.randomInt)(2, this.getBaseActionDuration()));
+      this.state._ActorAttacker.baseActionDuration = template.attackerActionDuration || 1000;
+      this.state._ActorAttacker.currentActionDuration = this.state._ActorAttacker.baseActionDuration;
+    }
+  },
+
+  METHODS: {
+    getBaseActionDuration: function getBaseActionDuration() {
+      return this.state._ActorAttacker.baseActionDuration;
+    },
+    setBaseActionDuration: function setBaseActionDuration(newValue) {
+      this.state._ActorAttacker.baseActionDuration = newValue;
+    },
+    getCurrentActionDuration: function getCurrentActionDuration() {
+      return this.state._ActorAttacker.currentActionDuration;
+    },
+    setCurrentActionDuration: function setCurrentActionDuration(newValue) {
+      this.state._ActorAttacker.currentActionDuration = newValue;
+    },
+    act: function act() {
+      _timing.TIME_ENGINE.lock();
+      var newX = void 0;
+      var newY = void 0;
+      for (var x = -1 * 1; x < 2; x++) {
+        for (var y = -1 * 1; y < 2; y++) {
+          newX = this.state.x * 1 + x * 1;
+          newY = this.state.y * 1 + y * 1;
+          var targetPositionInfo = this.getMap().getTargetPositionInfo(newX, newY);
+          console.log("actorAttacker working");
+          console.dir(targetPositionInfo.entity);
+          console.log("x: " + x + ", y: " + y);
+          if (targetPositionInfo.entity && targetPositionInfo.entity != this) {
+            this.raiseMixinEvent('tryWalking', { 'dx': x, 'dy': y });
+            console.log("actorAttacker working2");
+            return;
+          }
+        }
+      }
+      console.log("actorAttacker not working2");
+      var dx = (0, _util.randomInt)(-1, 1);
+      var dy = (0, _util.randomInt)(-1, 1);
+      this.raiseMixinEvent('tryWalking', { 'dx': dx, 'dy': dy });
+      // SCHEDULER.setDuration(1000);
+      // TIME_ENGINE.unlock();
+    }
+  },
+
+  LISTENERS: {
+    // 'killedBy': function(){
+    //   SCHEDULER.remove(this);
+    // },
+    'actionDone': function actionDone() {
+      _timing.SCHEDULER.setDuration(this.getCurrentActionDuration());
+      this.setCurrentActionDuration(this.getBaseActionDuration() + (0, _util.randomInt)(-5, 5));
+      setTimeout(function () {
+        _timing.TIME_ENGINE.unlock();
+      }, 1);
+      console.log("Attacker still working");
+    }
+  }
+};
 
 /***/ }),
 /* 342 */
@@ -16858,7 +16869,7 @@ EntityFactory.learn({
   'chr': '&',
   'fg': '#d63',
   'maxHp': 5,
-  'mixinNames': ['HitPoints', 'WalkerCorporeal', 'ActorWanderer', 'Scorekeeper', 'MeleeAttacker']
+  'mixinNames': ['HitPoints', 'WalkerCorporeal', 'ActorAttacker', 'Scorekeeper', 'MeleeAttacker']
 
 });
 

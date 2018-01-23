@@ -105,9 +105,9 @@ export let WalkerCorporeal = {
       let newX = this.state.x*1 + dx*1;
       let newY = this.state.y*1 + dy*1;
 
-      console.log("walking " + this.chr);
+      //console.log("walking " + this.chr);
       let targetPositionInfo = this.getMap().getTargetPositionInfo(newX,newY);
-      console.dir(targetPositionInfo.entity);
+    //  console.dir(targetPositionInfo.entity);
       if (targetPositionInfo.entity.chr == '0' && this.chr == '@'){
         this.raiseMixinEvent('newLevel');
         return true;
@@ -404,65 +404,74 @@ export let Scorekeeper = {
   }
 };
 
-// export let ActorAttacker = {
-//   META: {
-//     mixInName:'ActorAttacker',
-//     mixInGroupName: 'ActorAttacker',
-//     stateNameSpace: '_ActorAttacker',
-//     stateModel: {
-//       baseActionDuration: 1000,
-//       actingState: false,
-//       currentActionDuration: 1000
-//     },
-//
-//     initialize: function(template){
-//       SCHEDULER.add(this,true,randomInt(2,this.getBaseActionDuration()));
-//       this.state._ActorAttacker.baseActionDuration = template.attackerActionDuration || 1000;
-//       this.state._ActorAttacker.currentActionDuration = this.state._ActorAttacker.baseActionDuration;
-//     }
-//   },
-//
-//   METHODS: {
-//     getBaseActionDuration: function () {
-//       return this.state._ActorAttacker.baseActionDuration;
-//     },
-//     setBaseActionDuration: function (newValue) {
-//       this.state._ActorAttacker.baseActionDuration = newValue;
-//     },
-//     getCurrentActionDuration: function () {
-//       return this.state._ActorAttacker.currentActionDuration;
-//     },
-//     setCurrentActionDuration: function (newValue) {
-//       this.state._ActorAttacker.currentActionDuration = newValue;
-//     },
-//     act: function(){
-//       TIME_ENGINE.lock();
-//       for(let dx = -1 *1; dx<2; dx++ ){
-//         for(let dy = -1 *1; dy<2; dy++ ){
-//           let targetPositionInfo = this.getMap().getTargetPositionInfo(dx,dy);
-//           if (targetPositionInfo.entity && dx !=0 $$ dy == 0){
-//             this.raiseMixinEvent('tryWalking',{'dx':dx, 'dy':dy});
-//             return;
-//           }
-//         }
-//       }
-//       dx = randomInt(-1,1);
-//       dy = randomInt(-1,1);
-//       this.raiseMixinEvent('tryWalking',{'dx':dx, 'dy':dy});
-//       // SCHEDULER.setDuration(1000);
-//       // TIME_ENGINE.unlock();
-//     }
-//   },
-//
-//   LISTENERS: {
-//     // 'killedBy': function(){
-//     //   SCHEDULER.remove(this);
-//     // },
-//     'actionDone': function(){
-//       SCHEDULER.setDuration(this.getCurrentActionDuration());
-//       this.setCurrentActionDuration(this.getBaseActionDuration()+randomInt(-5,5));
-//       setTimeout(function(){ TIME_ENGINE.unlock();},1);
-//       console.log("Attacker still working");
-//     }
-//   }
-// };
+export let ActorAttacker = {
+  META: {
+    mixInName:'ActorAttacker',
+    mixInGroupName: 'ActorAttacker',
+    stateNameSpace: '_ActorAttacker',
+    stateModel: {
+      baseActionDuration: 1000,
+      actingState: false,
+      currentActionDuration: 1000
+    },
+
+    initialize: function(template){
+      SCHEDULER.add(this,true,randomInt(2,this.getBaseActionDuration()));
+      this.state._ActorAttacker.baseActionDuration = template.attackerActionDuration || 1000;
+      this.state._ActorAttacker.currentActionDuration = this.state._ActorAttacker.baseActionDuration;
+    }
+  },
+
+  METHODS: {
+    getBaseActionDuration: function () {
+      return this.state._ActorAttacker.baseActionDuration;
+    },
+    setBaseActionDuration: function (newValue) {
+      this.state._ActorAttacker.baseActionDuration = newValue;
+    },
+    getCurrentActionDuration: function () {
+      return this.state._ActorAttacker.currentActionDuration;
+    },
+    setCurrentActionDuration: function (newValue) {
+      this.state._ActorAttacker.currentActionDuration = newValue;
+    },
+    act: function(){
+      TIME_ENGINE.lock();
+      let newX;
+      let newY;
+      for(let x = -1 *1; x<2; x++ ){
+        for(let y = -1 *1; y<2; y++ ){
+          newX = this.state.x*1 + x*1;
+          newY = this.state.y*1 + y*1;
+          let targetPositionInfo = this.getMap().getTargetPositionInfo(newX,newY);
+          console.log("actorAttacker working");
+          console.dir(targetPositionInfo.entity);
+          console.log("x: " + x +", y: "+ y);
+          if (targetPositionInfo.entity && targetPositionInfo.entity != this){
+            this.raiseMixinEvent('tryWalking',{'dx':x, 'dy':y});
+            console.log("actorAttacker working2");
+            return;
+          }
+        }
+      }
+      console.log("actorAttacker not working2");
+      let dx = randomInt(-1,1);
+      let dy = randomInt(-1,1);
+      this.raiseMixinEvent('tryWalking',{'dx':dx, 'dy':dy});
+      // SCHEDULER.setDuration(1000);
+      // TIME_ENGINE.unlock();
+    }
+  },
+
+  LISTENERS: {
+    // 'killedBy': function(){
+    //   SCHEDULER.remove(this);
+    // },
+    'actionDone': function(){
+      SCHEDULER.setDuration(this.getCurrentActionDuration());
+      this.setCurrentActionDuration(this.getBaseActionDuration()+randomInt(-5,5));
+      setTimeout(function(){ TIME_ENGINE.unlock();},1);
+      console.log("Attacker still working");
+    }
+  }
+};
