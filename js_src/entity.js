@@ -3,6 +3,8 @@
 import {MixableSymbol} from './mixableSym.js';
 import {uniqueId} from './util.js';
 import {DATASTORE} from './datastore.js';
+import {SCHEDULER} from'./timing.js';
+
 
 export class Entity extends MixableSymbol {
   constructor(template) {
@@ -33,6 +35,7 @@ export class Entity extends MixableSymbol {
     console.log("destroy");
     this.getMap().extractEntity(this);
     delete DATASTORE[this.getId()];
+    SCHEDULER.remove(this);
   }
 
   moveBy(dx,dy) {

@@ -132,6 +132,8 @@ export class UIModePersistence extends UIMode{
     }
     let restorationString = window.localStorage.getItem(this.game._PERSIST_NAMESPACE);
     let state = JSON.parse(restorationString);
+    console.log("Restore");
+    console.dir(state);
     clearDataStore();
     DATASTORE.ID_SEQ = state.ID_SEQ;
     DATASTORE.GAME = state.GAME;
@@ -139,6 +141,8 @@ export class UIModePersistence extends UIMode{
     this.game.fromJSON(state.GAME);
     for (let mapID in state.MAPS){
       let mapData = JSON.parse(state.MAPS[mapID]);
+      console.log("mapload");
+      console.dir(mapData);
       DATASTORE.MAPS[mapID] = MapMaker(mapData); //mapData.xdim, mapData.ydim, mapData.setRngState);
       DATASTORE.MAPS[mapID].build();
     }
@@ -146,7 +150,7 @@ export class UIModePersistence extends UIMode{
       DATASTORE.ENTITIES[entID] = JSON.parse(state.ENTITIES[entID]);
       let ent = EntityFactory.create(DATASTORE.ENTITIES[entID].name);
       if (DATASTORE.ENTITIES[entID].name == 'avatar'){
-        this.game._mode.play._STATE.avatarID = ent.getId();
+        this.game._mode.play._STATE.avatarId = ent.getId();
       }
       DATASTORE.MAPS[Object.keys(DATASTORE.MAPS)[0]].addEntityAt(ent, DATASTORE.ENTITIES[entID].x, DATASTORE.ENTITIES[entID].y)
       delete DATASTORE.ENTITIES[entID];
@@ -178,6 +182,7 @@ export class UIModePlay extends UIMode {
     this.game.isPlaying = true;
     setKeyBinding(['play','movement_numpad']);
     TIME_ENGINE.unlock();
+
   }
 
   startNewGame() {
@@ -185,6 +190,10 @@ export class UIModePlay extends UIMode {
     this._STATE = {};
     let m = MapMaker({xdim:20,ydim:20});
     //m.build();
+    this._STATE.newXDim = 20;
+    this._STATE.newYDim = 20;
+    this._STATE.level = 1;
+
     this._STATE.curMapId = m.getId();
     this._STATE.cameraMapLoc = {
       x: Math.round(m.getXDim()/2),
@@ -197,8 +206,6 @@ export class UIModePlay extends UIMode {
 
     //DisplaySymbol({'name': 'avatar', 'chr':'@', 'fg' '#eb4'});
     let a = EntityFactory.create('avatar');
-    let b = EntityFactory.create('moss');
-    let c = EntityFactory.create('monster');
     this._STATE.avatarId = a.getId();
     m.addEntityAtRandomPosition(a);
     this.moveCameraToAvatar();
@@ -206,8 +213,47 @@ export class UIModePlay extends UIMode {
     for(let mossCount = 0; mossCount<1; mossCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('moss'));
     }
-    for(let monsterCount = 0; monsterCount < 1;monsterCount++){
+    for(let monsterCount = 0; monsterCount < 4;monsterCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('monster'));
+    }
+    //for(let portalCount = 0; portalCount<1; portalCount++){
+    m.addEntityAtRandomPosition(EntityFactory.create('portal'));
+  //  }
+  }
+
+  startNewLevel(avatar, x, y, level) {
+    //initTiming();
+    //this._STATE = {};0
+    // x = 20 + x;
+    // y = 20 + y;
+    let m = MapMaker({xdim: x,ydim: y});
+    //m.build();
+    this._STATE.curMapId = m.getId();
+    this._STATE.cameraMapLoc = {
+      x: Math.round(m.getXDim()/2),
+      y: Math.round(m.getYDim()/2)
+    };
+    this._STATE.cameraDisplayLoc = {
+      x: Math.round(this.display.getOptions().width/2),
+      y: Math.round(this.display.getOptions().height/2)
+    };
+
+    //DisplaySymbol({'name': 'avatar', 'chr':'@', 'fg' '#eb4'});
+    //let a = EntityFactory.create('avatar');
+    this._STATE.avatarId = avatar.getId();
+    m.addEntityAtRandomPosition(avatar);
+    this.moveCameraToAvatar();
+
+    for(let mossCount = 0; mossCount< (5*level) ; mossCount++){
+      m.addEntityAtRandomPosition(EntityFactory.create('moss'));
+    }
+    for(let monsterCount = 0; monsterCount < (5*level);monsterCount++){
+      m.addEntityAtRandomPosition(EntityFactory.create('monster'));
+    }
+    if (level < 3){
+      m.addEntityAtRandomPosition(EntityFactory.create('portal'));
+    } else {
+      m.addEntityAtRandomPosition(EntityFactory.create('finish'));
     }
   }
 
@@ -233,6 +279,7 @@ export class UIModePlay extends UIMode {
     display.drawText(0, 3, "location: " + this.getAvatar().getX() + ", " + this.getAvatar().getY());
     display.drawText(0, 4, "Max HP: " + this.getAvatar().getMaxHp());
     display.drawText(0, 5, "Current HP: " + this.getAvatar().getHp());
+    display.drawText(0, 6, "Score: " + this.getAvatar().getScore());
   }
 
   handleInput(inputType,inputData) {
@@ -265,12 +312,26 @@ export class UIModePlay extends UIMode {
    } else
    if (gameCommand == COMMAND.MOVE_D) {
      avatarMoved = this.moveAvatar(0,1);
+   } else
+   if (gameCommand == COMMAND.REST){
+     //avatarMoved = this.moveAvatar(0,0);
+     this.getAvatar().raiseMixinEvent('actionDone');
+     //DATASTORE.ENTITIES[this._STATE.avatarId].gainHp(1);
    }
 
    if (avatarMoved) {
      this.moveCameraToAvatar();
    }
-
+   if (DATASTORE.ENTITIES[this._STATE.avatarId].getNewLevel()){
+     this._STATE.newXDim = this._STATE.newXDim + 10;
+     this._STATE.newYDim = this._STATE.newYDim + 10;
+     this._STATE.level++;
+     DATASTORE.ENTITIES[this._STATE.avatarId].setNewLevel(false);
+     this.startNewLevel(DATASTORE.ENTITIES[this._STATE.avatarId], this._STATE.newXDim, this._STATE.newYDim, this._STATE.level );
+   }
+   if( DATASTORE.ENTITIES[this._STATE.avatarId].getWin() ){
+     this.game.switchMode('win');
+   }
    //this.checkGameWinLose();
    return true;
 }
@@ -305,8 +366,9 @@ export class UIModeHelp extends UIMode{
     this.display.drawText(1, 6, "a - move left", Color.FG, Color.BG);
     this.display.drawText(1, 7, "s - move down", Color.FG, Color.BG);
     this.display.drawText(1, 8, "d - move right", Color.FG, Color.BG);
-    this.display.drawText(1, 9, "p - pause/ enter persistence mode", Color.FG, Color.BG);
-    this.display.drawText(1, 10, "h - help screen", Color.FG, Color.BG);
+    this.display.drawText(1, 9, "r - rest", Color.FG, Color.BG);
+    this.display.drawText(1, 10, "p - pause/ enter persistence mode", Color.FG, Color.BG);
+    this.display.drawText(1, 11, "h - help screen", Color.FG, Color.BG);
 
   }
 
@@ -343,8 +405,12 @@ export class UIModeWin extends UIMode {
   render() {
     this.display.drawText(1,1,"game win", Color.FG,Color.BG);
     this.display.drawText(1,3,"you WIN!!", Color.FG,Color.BG);
+    //this.display.drawText(1, 4, "Score: " + this.getAvatar().getScore());
+    //this.display.drawText(1, 5, "time: " + this.getAvatar().getTime());
     Message.send("entering " + this.constructor.name);
   }
+
+  renderAvatar(){}
 }
 
 
