@@ -8546,6 +8546,8 @@ var _color = __webpack_require__(95);
 
 var Message = exports.Message = {
   _curMessage: '',
+  _curMessage2: '',
+  _curMessage3: '',
   _targetDisplay: '',
   init: function init(targetDisplay) {
     this._targetDisplay = targetDisplay;
@@ -8556,14 +8558,26 @@ var Message = exports.Message = {
     }
     this._targetDisplay.clear();
     this._targetDisplay.drawText(1, 1, this._curMessage, _color.Color.FG, _color.Color.BG);
+    this._targetDisplay.drawText(1, 2, this._curMessage2, _color.Color.FG, _color.Color.BG);
+    this._targetDisplay.drawText(1, 3, this._curMessage3, _color.Color.FG, _color.Color.BG);
   },
   send: function send(msg) {
+    console.log("in Message.send");
+    console.log("sending: " + msg);
+    //if(this._curMessage){
+    this._curMessage3 = this._curMessage2;
+
+    this._curMessage2 = this._curMessage;
+    //} else{
+    //  this._curMessage2 = '';
+    //  }
     this._curMessage = msg;
     this.render();
   },
   clear: function clear() {
     //this._curMessage = '';
-    targetDisplay.drawText(1, 1, '', _color.Color.FG, _color.Color.BG);
+    this._targetDisplay.drawText(1, 1, '', _color.Color.FG, _color.Color.BG);
+    this._targetDisplay.drawText(1, 2, '', _color.Color.FG, _color.Color.BG);
   }
 };
 
@@ -9612,6 +9626,15 @@ var Map = function () {
         return _tile.TILES.NULLTILE;
       }
       return this.tileGrid[x][y] || _tile.TILES.NULLTILE;
+    }
+  }, {
+    key: 'getListOfEntities',
+    value: function getListOfEntities() {
+      var entList = [];
+      for (var entId in this.state.entityIdToMapPos) {
+        entList.push(_datastore.DATASTORE.ENTITIES[entId]);
+      }
+      return entList;
     }
   }, {
     key: 'extractEntity',
@@ -15522,6 +15545,8 @@ var Game = exports.Game = {
   init: function init() {
     console.log("Game object:");
     console.dir(Game);
+    console.log("message object:");
+    console.dir(_message.Message);
 
     this.setupDisplays();
     this.setupModes();
@@ -15760,7 +15785,11 @@ var UIModeStart = exports.UIModeStart = function (_UIMode) {
     key: 'render',
     value: function render() {
       this.display.drawText(1, 1, "game start", _color.Color.FG, _color.Color.BG);
-      this.display.drawText(1, 3, "press any key to play", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 3, "Poor Lucas got lost one evening on a midnight stroll,", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 5, "somehow he ended up in the fearsomely ferocious forest.", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 7, "He needs to find his way back home to the *.", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 9, "Guide him home while collecting monster treasure...", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 11, "Press any key to continue", _color.Color.FG, _color.Color.BG);
     }
   }, {
     key: 'handleInput',
@@ -15802,6 +15831,8 @@ var UIModePersistence = exports.UIModePersistence = function (_UIMode2) {
     value: function render() {
       this.display.drawText(1, 1, "Game Control", _color.Color.FG, _color.Color.BG);
       this.display.drawText(5, 3, "N - Start new game", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 7, "Press h for help", _color.Color.FG, _color.Color.BG);
+
       if (this.game.isPlaying) {
         this.display.drawText(5, 4, "S - Save your current game", _color.Color.FG, _color.Color.BG);
         this.display.drawText(1, 8, "[Escape] - cancel/return to play", _color.Color.FG, _color.Color.BG);
@@ -15836,6 +15867,8 @@ var UIModePersistence = exports.UIModePersistence = function (_UIMode2) {
         if (this.game.isPlaying) {
           this.game.switchMode('play');
         }
+      } else if (gameCommand == _command.COMMAND.HELP) {
+        this.game.switchMode('help');
       }
       return false;
     }
@@ -15947,6 +15980,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       //DisplaySymbol({'name': 'avatar', 'chr':'@', 'fg' '#eb4'});
       var a = _entities.EntityFactory.create('avatar');
       this._STATE.avatarId = a.getId();
+      //a.setMeleeDamage(1);
       m.addEntityAtRandomPosition(a);
       this.moveCameraToAvatar();
 
@@ -15959,6 +15993,13 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       //for(let portalCount = 0; portalCount<1; portalCount++){
       m.addEntityAtRandomPosition(_entities.EntityFactory.create('portal'));
       //  }
+    }
+  }, {
+    key: 'clearCurrentLevel',
+    value: function clearCurrentLevel() {
+      var currentMap = this.getMap();
+      var listOfEntitiesOnMap = currentMap.getListOfEntities();
+      //if(let i = 0)
     }
   }, {
     key: 'startNewLevel',
@@ -15991,7 +16032,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       for (var monsterCount = 0; monsterCount < 5 * level; monsterCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('monster'));
       }
-      if (level < 3) {
+      if (level < 20) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('portal'));
       } else {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('finish'));
@@ -16010,7 +16051,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
   }, {
     key: 'render',
     value: function render() {
-      _message.Message.send("entering " + this.constructor.name);
+      //Message.send("entering " + this.constructor.name);
       _datastore.DATASTORE.MAPS[this._STATE.curMapId].render(this.display, this._STATE.cameraMapLoc.x, this._STATE.cameraMapLoc.y);
       //this.avatarSym.render(this.display,this._STATE.cameraDisplayLoc.x,this._STATE.cameraDisplayLoc.y);
     }
@@ -16023,7 +16064,8 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       display.drawText(0, 3, "location: " + this.getAvatar().getX() + ", " + this.getAvatar().getY());
       display.drawText(0, 4, "Max HP: " + this.getAvatar().getMaxHp());
       display.drawText(0, 5, "Current HP: " + this.getAvatar().getHp());
-      display.drawText(0, 6, "Score: " + this.getAvatar().getScore());
+      display.drawText(0, 6, "Treasure: " + this.getAvatar().getScore());
+      display.drawText(0, 7, "Level: " + this._STATE.level);
     }
   }, {
     key: 'handleInput',
@@ -16059,7 +16101,8 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       } else if (gameCommand == _command.COMMAND.REST) {
         //avatarMoved = this.moveAvatar(0,0);
         this.getAvatar().raiseMixinEvent('actionDone');
-        //DATASTORE.ENTITIES[this._STATE.avatarId].gainHp(1);
+        _datastore.DATASTORE.ENTITIES[this._STATE.avatarId].addTime(1);
+        _datastore.DATASTORE.ENTITIES[this._STATE.avatarId].gainHp(1);
       }
 
       if (avatarMoved) {
@@ -16070,10 +16113,25 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
         this._STATE.newYDim = this._STATE.newYDim + 10;
         this._STATE.level++;
         _datastore.DATASTORE.ENTITIES[this._STATE.avatarId].setNewLevel(false);
+        //console.log("levels: " + DATASTORE.ENTITIES.length()  );
+        // destroy old monsters
+        //  for(let i = 0; i < DATASTORE.ENTITIES.length; i++){
+        //    console.log("destroy");
+        //    console.dir(DATASTORE.ENTITIES[i]);
+        //    if(DATASTORE.ENTITIES[i].chr == '&' || DATASTORE.ENTITIES[i].chr == '#'){
+        //      DATASTORE.ENTITIES[i].destroy();
+        //      console.log("destroy");
+        //    }
+        //  }
+        this.clearCurrentLevel();
         this.startNewLevel(_datastore.DATASTORE.ENTITIES[this._STATE.avatarId], this._STATE.newXDim, this._STATE.newYDim, this._STATE.level);
       }
       if (_datastore.DATASTORE.ENTITIES[this._STATE.avatarId].getWin()) {
         this.game.switchMode('win');
+      }
+      if (_datastore.DATASTORE.ENTITIES[this._STATE.avatarId].getLose()) {
+        //SCHEDULER.lock();
+        this.game.switchMode('lose');
       }
       //this.checkGameWinLose();
       return true;
@@ -16085,8 +16143,6 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
         _datastore.DATASTORE.ENTITIES[this._STATE.avatarId].addTime(1);
         this.moveCameraToAvatar();
         //this.render();
-      } else {
-        _message.Message.send("you cannot move there");
       }
     }
   }, {
@@ -16126,9 +16182,13 @@ var UIModeHelp = exports.UIModeHelp = function (_UIMode4) {
       this.display.drawText(1, 6, "a - move left", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 7, "s - move down", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 8, "d - move right", _color.Color.FG, _color.Color.BG);
-      this.display.drawText(1, 9, "r - rest", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 9, "r - rest and gain hp", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 10, "p - pause/ enter persistence mode", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 11, "h - help screen", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 13, "0 - portals to different realms", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 14, "& - dangerous monsters", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 15, "* - home", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 16, "# - Moss- destroy for health and points", _color.Color.FG, _color.Color.BG);
     }
   }, {
     key: 'handleInput',
@@ -16227,6 +16287,9 @@ var UIModeLose = exports.UIModeLose = function (_UIMode7) {
       this.display.drawText(1, 3, "you lose.", _color.Color.FG, _color.Color.BG);
       _message.Message.send("entering " + this.constructor.name);
     }
+  }, {
+    key: 'renderAvatar',
+    value: function renderAvatar() {}
   }]);
 
   return UIModeLose;
@@ -16382,16 +16445,18 @@ var PlayerMessage = exports.PlayerMessage = {
       _message.Message.send('can\'t move there because ' + evtData.reason);
     },
     'attacks': function attacks(evtData) {
-      console.log(evtData.target.getName() + "attacked");
       _message.Message.send(this.getName() + " attacks " + evtData.target.getName());
     },
     'damages': function damages(evtData) {
-      _message.Message.send(this.getName() + " deals " + evtData.damageAmount + " damage to" + evtData.target.getName());
+      _message.Message.send(this.getName() + " deals " + evtData.damageAmount + " damage to " + evtData.target.getName());
     },
     'kills': function kills(evtData) {
       _message.Message.send(this.getName() + " kills " + evtData.target.getName());
     },
     'killedBy': function killedBy(evtData) {
+      if (evtData.target.chr == '#' && this.chr == '@') {
+        this.gainHp(20);
+      }
       _message.Message.send(evtData.target.getName() + " was killed by " + this.getName());
     }
   }
@@ -16422,7 +16487,7 @@ var TimeTracker = exports.TimeTracker = {
   },
   LISTENERS: {
     'turnTaken': function turnTaken(evtData) {
-      this.addTime(evtData.timeUsed);
+      //this.addTime(evtData.timeUsed);
     }
   }
 };
@@ -16450,10 +16515,10 @@ var WalkerCorporeal = exports.WalkerCorporeal = {
         this.setWin(true);
         return false;
       }
-      // if (targetPositionInfo.entity && targetPositionInfo.entity.chr != this.chr){
-      if (targetPositionInfo.entity) {
+      //if (targetPositionInfo.entity && targetPositionInfo.entity.chr != this.chr){
+      if (targetPositionInfo.entity && targetPositionInfo.entity != this) {
         //&& targetPositionInfo.entity.chr != this.chr){
-
+        //if (targetPositionInfo.entity.chr == this.chr){
         this.raiseMixinEvent('bumpEntity', { actor: this, target: targetPositionInfo.entity });
         console.log(targetPositionInfo.entity.chr + " bumped by " + this.chr);
         this.raiseMixinEvent('actionDone');
@@ -16528,16 +16593,21 @@ var HitPoints = exports.HitPoints = {
     'damaged': function damaged(evtData) {
       //evtData.src
       this.loseHp(evtData.damageAmount);
-      evtData.src.raiseMixinEvent('damages', { target: this, damageAmount: evtData.damageAmount });
+      evtData.src.raiseMixinEvent('damages', { target: evtData.target, damageAmount: evtData.damageAmount, src: evtData.src });
       console.log("hp " + this.getHp());
 
-      if (this.getHp() == 0) {
+      if (this.getHp() <= 0) {
         this.raiseMixinEvent('killedBy', { src: evtData.src, target: evtData.target });
         evtData.src.raiseMixinEvent('killedBy', { src: evtData.src, target: evtData.target });
         console.log("destroy");
         console.dir(evtData.src);
         if (evtData.src.chr == "@") {
           this.raiseMixinEvent('scoreEvent', { monsterHp: this.getMaxHp(), avatar: evtData.src });
+        } else if (this.chr == "@") {
+          console.log("you suck");
+          console.dir(this);
+          evtData.target.setLose(true);
+          _timing.TIME_ENGINE.lock();
         }
 
         this.destroy();
@@ -16590,7 +16660,8 @@ var ActorPlayer = exports.ActorPlayer = {
       actingState: false,
       currentActionDuration: 1000,
       newLevel: false,
-      win: false
+      win: false,
+      lose: false
     },
 
     initialize: function initialize() {
@@ -16631,6 +16702,12 @@ var ActorPlayer = exports.ActorPlayer = {
     },
     getWin: function getWin() {
       return this.state._ActorPlayer.win;
+    },
+    setLose: function setLose(bool) {
+      this.state._ActorPlayer.lose = bool;
+    },
+    getLose: function getLose() {
+      return this.state._ActorPlayer.lose;
     },
     act: function act() {
       if (this.isActing()) {
@@ -16792,17 +16869,13 @@ var ActorAttacker = exports.ActorAttacker = {
           newX = this.state.x * 1 + x * 1;
           newY = this.state.y * 1 + y * 1;
           var targetPositionInfo = this.getMap().getTargetPositionInfo(newX, newY);
-          console.log("actorAttacker working");
-          console.dir(targetPositionInfo.entity);
-          console.log("x: " + x + ", y: " + y);
-          if (targetPositionInfo.entity && targetPositionInfo.entity != this) {
+          if (targetPositionInfo.entity && targetPositionInfo.entity.chr != this.chr) {
             this.raiseMixinEvent('tryWalking', { 'dx': x, 'dy': y });
-            console.log("actorAttacker working2");
             return;
           }
         }
       }
-      console.log("actorAttacker not working2");
+
       var dx = (0, _util.randomInt)(-1, 1);
       var dy = (0, _util.randomInt)(-1, 1);
       this.raiseMixinEvent('tryWalking', { 'dx': dx, 'dy': dy });
@@ -16821,7 +16894,6 @@ var ActorAttacker = exports.ActorAttacker = {
       setTimeout(function () {
         _timing.TIME_ENGINE.unlock();
       }, 1);
-      console.log("Attacker still working");
     }
   }
 };
@@ -16851,7 +16923,7 @@ EntityFactory.learn({
   'chr': '@',
   'fg': '#eb4',
   'mixinNames': ['TimeTracker', 'WalkerCorporeal', 'PlayerMessage', 'HitPoints', 'MeleeAttacker', 'ActorPlayer', 'Scorekeeper'],
-  'maxHp': 10
+  'maxHp': 100
 
 });
 
@@ -16869,7 +16941,8 @@ EntityFactory.learn({
   'chr': '&',
   'fg': '#d63',
   'maxHp': 5,
-  'mixinNames': ['HitPoints', 'WalkerCorporeal', 'ActorAttacker', 'Scorekeeper', 'MeleeAttacker']
+  'mixinNames': ['HitPoints', 'WalkerCorporeal', 'ActorAttacker', 'Scorekeeper', 'MeleeAttacker'],
+  'meleeDamage': 10
 
 });
 

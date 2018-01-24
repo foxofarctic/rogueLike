@@ -48,16 +48,18 @@ export let PlayerMessage = {
       Message.send('can\'t move there because ' + evtData.reason);
     },
     'attacks': function(evtData){
-      console.log(evtData.target.getName() + "attacked");
       Message.send(this.getName()+" attacks "+evtData.target.getName());
     },
     'damages': function(evtData){
-      Message.send(this.getName()+" deals "+evtData.damageAmount + " damage to" + evtData.target.getName());
+      Message.send(this.getName()+" deals "+evtData.damageAmount + " damage to " + evtData.target.getName());
     },
     'kills': function(evtData){
       Message.send(this.getName()+" kills " + evtData.target.getName());
     },
     'killedBy': function(evtData){
+      if (evtData.target.chr == '#' && this.chr == '@' ){
+        this.gainHp(20);
+      }
       Message.send(evtData.target.getName()+ " was killed by " + this.getName());
     }
   }
@@ -88,7 +90,7 @@ export let TimeTracker = {
   },
   LISTENERS: {
     'turnTaken': function(evtData) {
-      this.addTime(evtData.timeUsed);
+      //this.addTime(evtData.timeUsed);
     }
   }
 };
@@ -116,9 +118,9 @@ export let WalkerCorporeal = {
         this.setWin(true);
         return false;
       }
-      // if (targetPositionInfo.entity && targetPositionInfo.entity.chr != this.chr){
-      if (targetPositionInfo.entity){//&& targetPositionInfo.entity.chr != this.chr){
-
+      //if (targetPositionInfo.entity && targetPositionInfo.entity.chr != this.chr){
+      if (targetPositionInfo.entity && targetPositionInfo.entity != this){//&& targetPositionInfo.entity.chr != this.chr){
+        //if (targetPositionInfo.entity.chr == this.chr){
         this.raiseMixinEvent('bumpEntity', {actor: this, target: targetPositionInfo.entity});
         console.log(targetPositionInfo.entity.chr + " bumped by " + this.chr);
         this.raiseMixinEvent('actionDone');
@@ -196,16 +198,21 @@ export let HitPoints = {
       //evtData.src
       this.loseHp(evtData.damageAmount);
       evtData.src.raiseMixinEvent('damages',
-      {target: this,damageAmount:evtData.damageAmount});
+      {target: evtData.target,damageAmount:evtData.damageAmount, src: evtData.src});
       console.log("hp "+ this.getHp());
 
-      if (this.getHp() == 0){
+      if (this.getHp() <= 0){
         this.raiseMixinEvent('killedBy',{src:evtData.src, target: evtData.target});
         evtData.src.raiseMixinEvent('killedBy',{src:evtData.src, target: evtData.target});
         console.log("destroy");
         console.dir(evtData.src);
         if(evtData.src.chr == "@"){
           this.raiseMixinEvent('scoreEvent',{monsterHp: this.getMaxHp(), avatar: evtData.src});
+        } else if(this.chr == "@" ){
+          console.log("you suck");
+          console.dir(this);
+          evtData.target.setLose(true);
+            TIME_ENGINE.lock();
         }
 
         this.destroy();
@@ -254,7 +261,8 @@ export let ActorPlayer = {
       actingState: false,
       currentActionDuration: 1000,
       newLevel: false,
-      win: false
+      win: false,
+      lose: false
     },
 
     initialize: function(){
@@ -288,6 +296,8 @@ export let ActorPlayer = {
     setNewLevel: function(bool){ this.state._ActorPlayer.newLevel = bool;},
     setWin: function(bool){this.state._ActorPlayer.win = bool;},
     getWin: function(){return this.state._ActorPlayer.win},
+    setLose: function(bool){this.state._ActorPlayer.lose = bool;},
+    getLose: function(){return this.state._ActorPlayer.lose},
     act: function(){
       if (this.isActing()) {
         return;
@@ -444,17 +454,13 @@ export let ActorAttacker = {
           newX = this.state.x*1 + x*1;
           newY = this.state.y*1 + y*1;
           let targetPositionInfo = this.getMap().getTargetPositionInfo(newX,newY);
-          console.log("actorAttacker working");
-          console.dir(targetPositionInfo.entity);
-          console.log("x: " + x +", y: "+ y);
-          if (targetPositionInfo.entity && targetPositionInfo.entity != this){
+          if (targetPositionInfo.entity && targetPositionInfo.entity.chr != this.chr){
             this.raiseMixinEvent('tryWalking',{'dx':x, 'dy':y});
-            console.log("actorAttacker working2");
             return;
           }
         }
       }
-      console.log("actorAttacker not working2");
+
       let dx = randomInt(-1,1);
       let dy = randomInt(-1,1);
       this.raiseMixinEvent('tryWalking',{'dx':dx, 'dy':dy});
@@ -471,7 +477,6 @@ export let ActorAttacker = {
       SCHEDULER.setDuration(this.getCurrentActionDuration());
       this.setCurrentActionDuration(this.getBaseActionDuration()+randomInt(-5,5));
       setTimeout(function(){ TIME_ENGINE.unlock();},1);
-      console.log("Attacker still working");
     }
   }
 };

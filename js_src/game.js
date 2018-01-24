@@ -57,6 +57,9 @@ export let Game = {
   init: function() {
     console.log("Game object:");
     console.dir(Game);
+    console.log("message object:");
+    console.dir(Message);
+
 
     this.setupDisplays();
     this.setupModes();
