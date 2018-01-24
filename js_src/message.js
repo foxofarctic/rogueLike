@@ -11,6 +11,8 @@ export let Message = {
     this._targetDisplay.drawText(1,1,this._curMessage,Color.FG,Color.BG);
   },
   send: function (msg) {
+    console.log("in Message.send");
+    console.log("sending: "+msg);
     this._curMessage = msg;
     this.render();
   },

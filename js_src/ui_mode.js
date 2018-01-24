@@ -52,7 +52,12 @@ export class UIModeStart extends UIMode {
 
   render() {
     this.display.drawText(1, 1, "game start", Color.FG, Color.BG);
-    this.display.drawText(1, 3, "press any key to play", Color.FG, Color.BG);
+    this.display.drawText(1, 3, "Poor Lucas got lost one evening on a midnight stroll,", Color.FG, Color.BG);
+    this.display.drawText(1, 5, "somehow he ended up in the fearsomely ferocious forest.", Color.FG, Color.BG);
+    this.display.drawText(1, 7, "He needs to find his way back home to the *.", Color.FG, Color.BG);
+    this.display.drawText(1, 9, "Guide him home while collecting monster treasure...", Color.FG, Color.BG);
+    this.display.drawText(1, 11, "Press any key to continue", Color.FG, Color.BG);
+
   }
 
   handleInput(inputType,inputData) {
@@ -77,6 +82,8 @@ export class UIModePersistence extends UIMode{
   render(){
     this.display.drawText(1, 1, "Game Control", Color.FG, Color.BG);
     this.display.drawText(5 , 3, "N - Start new game", Color.FG, Color.BG);
+    this.display.drawText(1, 7, "Press h for help", Color.FG, Color.BG);
+
     if (this.game.isPlaying) {
       this.display.drawText(5, 4, "S - Save your current game", Color.FG, Color.BG);
       this.display.drawText(1, 8, "[Escape] - cancel/return to play", Color.FG, Color.BG);
@@ -111,6 +118,9 @@ export class UIModePersistence extends UIMode{
       if (this.game.isPlaying) {
         this.game.switchMode('play');
       }
+    } else
+    if (gameCommand == COMMAND.HELP) {
+        this.game.switchMode('help');
     }
     return false;
   }
@@ -207,6 +217,7 @@ export class UIModePlay extends UIMode {
     //DisplaySymbol({'name': 'avatar', 'chr':'@', 'fg' '#eb4'});
     let a = EntityFactory.create('avatar');
     this._STATE.avatarId = a.getId();
+    //a.setMeleeDamage(1);
     m.addEntityAtRandomPosition(a);
     this.moveCameraToAvatar();
 
@@ -250,7 +261,7 @@ export class UIModePlay extends UIMode {
     for(let monsterCount = 0; monsterCount < (5*level);monsterCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('monster'));
     }
-    if (level < 3){
+    if (level < 20){
       m.addEntityAtRandomPosition(EntityFactory.create('portal'));
     } else {
       m.addEntityAtRandomPosition(EntityFactory.create('finish'));
@@ -266,7 +277,7 @@ export class UIModePlay extends UIMode {
   }
 
   render() {
-    Message.send("entering " + this.constructor.name);
+    //Message.send("entering " + this.constructor.name);
     DATASTORE.MAPS[this._STATE.curMapId].render(this.display,
     this._STATE.cameraMapLoc.x,this._STATE.cameraMapLoc.y);
     //this.avatarSym.render(this.display,this._STATE.cameraDisplayLoc.x,this._STATE.cameraDisplayLoc.y);
@@ -279,7 +290,7 @@ export class UIModePlay extends UIMode {
     display.drawText(0, 3, "location: " + this.getAvatar().getX() + ", " + this.getAvatar().getY());
     display.drawText(0, 4, "Max HP: " + this.getAvatar().getMaxHp());
     display.drawText(0, 5, "Current HP: " + this.getAvatar().getHp());
-    display.drawText(0, 6, "Score: " + this.getAvatar().getScore());
+    display.drawText(0, 6, "Treasure: " + this.getAvatar().getScore());
   }
 
   handleInput(inputType,inputData) {
@@ -316,7 +327,8 @@ export class UIModePlay extends UIMode {
    if (gameCommand == COMMAND.REST){
      //avatarMoved = this.moveAvatar(0,0);
      this.getAvatar().raiseMixinEvent('actionDone');
-     //DATASTORE.ENTITIES[this._STATE.avatarId].gainHp(1);
+     DATASTORE.ENTITIES[this._STATE.avatarId].addTime(1);
+     DATASTORE.ENTITIES[this._STATE.avatarId].gainHp(1);
    }
 
    if (avatarMoved) {
@@ -332,6 +344,10 @@ export class UIModePlay extends UIMode {
    if( DATASTORE.ENTITIES[this._STATE.avatarId].getWin() ){
      this.game.switchMode('win');
    }
+   if( DATASTORE.ENTITIES[this._STATE.avatarId].getLose()){
+     //SCHEDULER.lock();
+     this.game.switchMode('lose');
+   }
    //this.checkGameWinLose();
    return true;
 }
@@ -341,9 +357,7 @@ export class UIModePlay extends UIMode {
       DATASTORE.ENTITIES[this._STATE.avatarId].addTime(1);
       this.moveCameraToAvatar();
       //this.render();
-    } else {
-      Message.send("you cannot move there");
-    }
+    } 
   }
 
   moveCameraToAvatar(){
@@ -366,9 +380,13 @@ export class UIModeHelp extends UIMode{
     this.display.drawText(1, 6, "a - move left", Color.FG, Color.BG);
     this.display.drawText(1, 7, "s - move down", Color.FG, Color.BG);
     this.display.drawText(1, 8, "d - move right", Color.FG, Color.BG);
-    this.display.drawText(1, 9, "r - rest", Color.FG, Color.BG);
+    this.display.drawText(1, 9, "r - rest and gain hp", Color.FG, Color.BG);
     this.display.drawText(1, 10, "p - pause/ enter persistence mode", Color.FG, Color.BG);
     this.display.drawText(1, 11, "h - help screen", Color.FG, Color.BG);
+    this.display.drawText(1, 13, "0 - portals to different realms", Color.FG, Color.BG);
+    this.display.drawText(1, 14, "& - dangerous monsters", Color.FG, Color.BG);
+    this.display.drawText(1, 15, "* - home", Color.FG, Color.BG);
+    this.display.drawText(1, 16, "# - Moss- kill for extra points", Color.FG, Color.BG);
 
   }
 

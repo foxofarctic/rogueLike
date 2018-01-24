@@ -45,6 +45,8 @@ export let PlayerMessage = {
   },
   LISTENERS: {
     'wallBlocked': function(evtData) {
+      console.log("wall");
+      console.dir(Message);
       Message.send('can\'t move there because ' + evtData.reason);
     },
     'attacks': function(evtData){
@@ -88,7 +90,7 @@ export let TimeTracker = {
   },
   LISTENERS: {
     'turnTaken': function(evtData) {
-      this.addTime(evtData.timeUsed);
+      //this.addTime(evtData.timeUsed);
     }
   }
 };
@@ -116,9 +118,9 @@ export let WalkerCorporeal = {
         this.setWin(true);
         return false;
       }
-      // if (targetPositionInfo.entity && targetPositionInfo.entity.chr != this.chr){
-      if (targetPositionInfo.entity){//&& targetPositionInfo.entity.chr != this.chr){
-
+      //if (targetPositionInfo.entity && targetPositionInfo.entity.chr != this.chr){
+      if (targetPositionInfo.entity && targetPositionInfo.entity != this){//&& targetPositionInfo.entity.chr != this.chr){
+        //if (targetPositionInfo.entity.chr == this.chr){
         this.raiseMixinEvent('bumpEntity', {actor: this, target: targetPositionInfo.entity});
         console.log(targetPositionInfo.entity.chr + " bumped by " + this.chr);
         this.raiseMixinEvent('actionDone');
@@ -199,13 +201,16 @@ export let HitPoints = {
       {target: this,damageAmount:evtData.damageAmount});
       console.log("hp "+ this.getHp());
 
-      if (this.getHp() == 0){
+      if (this.getHp() <= 0){
         this.raiseMixinEvent('killedBy',{src:evtData.src, target: evtData.target});
         evtData.src.raiseMixinEvent('killedBy',{src:evtData.src, target: evtData.target});
         console.log("destroy");
         console.dir(evtData.src);
         if(evtData.src.chr == "@"){
           this.raiseMixinEvent('scoreEvent',{monsterHp: this.getMaxHp(), avatar: evtData.src});
+        } else if(evtData.target.chr == "@"){
+          evtData.target.setLose(true);
+            TIME_ENGINE.lock();
         }
 
         this.destroy();
@@ -254,7 +259,8 @@ export let ActorPlayer = {
       actingState: false,
       currentActionDuration: 1000,
       newLevel: false,
-      win: false
+      win: false,
+      lose: false
     },
 
     initialize: function(){
@@ -288,6 +294,8 @@ export let ActorPlayer = {
     setNewLevel: function(bool){ this.state._ActorPlayer.newLevel = bool;},
     setWin: function(bool){this.state._ActorPlayer.win = bool;},
     getWin: function(){return this.state._ActorPlayer.win},
+    setLose: function(bool){this.state._ActorPlayer.lose = bool;},
+    getLose: function(){return this.state._ActorPlayer.lose},
     act: function(){
       if (this.isActing()) {
         return;
@@ -447,7 +455,7 @@ export let ActorAttacker = {
           console.log("actorAttacker working");
           console.dir(targetPositionInfo.entity);
           console.log("x: " + x +", y: "+ y);
-          if (targetPositionInfo.entity && targetPositionInfo.entity != this){
+          if (targetPositionInfo.entity && targetPositionInfo.entity.chr != this.chr){
             this.raiseMixinEvent('tryWalking',{'dx':x, 'dy':y});
             console.log("actorAttacker working2");
             return;
@@ -455,6 +463,7 @@ export let ActorAttacker = {
         }
       }
       console.log("actorAttacker not working2");
+
       let dx = randomInt(-1,1);
       let dy = randomInt(-1,1);
       this.raiseMixinEvent('tryWalking',{'dx':dx, 'dy':dy});

@@ -10,7 +10,7 @@ EntityFactory.learn({
   'chr': '@',
   'fg': '#eb4',
   'mixinNames': ['TimeTracker','WalkerCorporeal','PlayerMessage','HitPoints','MeleeAttacker','ActorPlayer','Scorekeeper'],
-  'maxHp': 10
+  'maxHp': 100
 
 });
 
@@ -28,8 +28,8 @@ EntityFactory.learn({
     'chr': '&',
     'fg': '#d63',
     'maxHp': 5,
-    'mixinNames': ['HitPoints','WalkerCorporeal','ActorAttacker','Scorekeeper', 'MeleeAttacker']
-
+    'mixinNames': ['HitPoints','WalkerCorporeal','ActorAttacker','Scorekeeper', 'MeleeAttacker'],
+    'meleeDamage': 10
 
   });
 
