@@ -44,6 +44,14 @@ class Map{
     return this.tileGrid[x][y] || TILES.NULLTILE;
   }
 
+  getListOfEntities() {
+    let entList = [];
+    for (let entId in this.state.entityIdToMapPos) {
+      entList.push(DATASTORE.ENTITIES[entId]);
+    }
+    return entList;
+  }
+
   extractEntity(ent){
     delete this.state.mapPosToEntityId[this.state.entityIdToMapPos[ent.getId()]];
     delete this.state.entityIdToMapPos[ent.getId()];

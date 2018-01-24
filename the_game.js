@@ -8546,6 +8546,8 @@ var _color = __webpack_require__(95);
 
 var Message = exports.Message = {
   _curMessage: '',
+  _curMessage2: '',
+  _curMessage3: '',
   _targetDisplay: '',
   init: function init(targetDisplay) {
     this._targetDisplay = targetDisplay;
@@ -8556,16 +8558,26 @@ var Message = exports.Message = {
     }
     this._targetDisplay.clear();
     this._targetDisplay.drawText(1, 1, this._curMessage, _color.Color.FG, _color.Color.BG);
+    this._targetDisplay.drawText(1, 2, this._curMessage2, _color.Color.FG, _color.Color.BG);
+    this._targetDisplay.drawText(1, 3, this._curMessage3, _color.Color.FG, _color.Color.BG);
   },
   send: function send(msg) {
     console.log("in Message.send");
     console.log("sending: " + msg);
+    //if(this._curMessage){
+    this._curMessage3 = this._curMessage2;
+
+    this._curMessage2 = this._curMessage;
+    //} else{
+    //  this._curMessage2 = '';
+    //  }
     this._curMessage = msg;
     this.render();
   },
   clear: function clear() {
     //this._curMessage = '';
-    targetDisplay.drawText(1, 1, '', _color.Color.FG, _color.Color.BG);
+    this._targetDisplay.drawText(1, 1, '', _color.Color.FG, _color.Color.BG);
+    this._targetDisplay.drawText(1, 2, '', _color.Color.FG, _color.Color.BG);
   }
 };
 
@@ -9614,6 +9626,15 @@ var Map = function () {
         return _tile.TILES.NULLTILE;
       }
       return this.tileGrid[x][y] || _tile.TILES.NULLTILE;
+    }
+  }, {
+    key: 'getListOfEntities',
+    value: function getListOfEntities() {
+      var entList = [];
+      for (var entId in this.state.entityIdToMapPos) {
+        entList.push(_datastore.DATASTORE.ENTITIES[entId]);
+      }
+      return entList;
     }
   }, {
     key: 'extractEntity',
@@ -15974,6 +15995,13 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       //  }
     }
   }, {
+    key: 'clearCurrentLevel',
+    value: function clearCurrentLevel() {
+      var currentMap = this.getMap();
+      var listOfEntitiesOnMap = currentMap.getListOfEntities();
+      //if(let i = 0)
+    }
+  }, {
     key: 'startNewLevel',
     value: function startNewLevel(avatar, x, y, level) {
       //initTiming();
@@ -16037,6 +16065,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       display.drawText(0, 4, "Max HP: " + this.getAvatar().getMaxHp());
       display.drawText(0, 5, "Current HP: " + this.getAvatar().getHp());
       display.drawText(0, 6, "Treasure: " + this.getAvatar().getScore());
+      display.drawText(0, 7, "Level: " + this._STATE.level);
     }
   }, {
     key: 'handleInput',
@@ -16084,6 +16113,17 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
         this._STATE.newYDim = this._STATE.newYDim + 10;
         this._STATE.level++;
         _datastore.DATASTORE.ENTITIES[this._STATE.avatarId].setNewLevel(false);
+        //console.log("levels: " + DATASTORE.ENTITIES.length()  );
+        // destroy old monsters
+        //  for(let i = 0; i < DATASTORE.ENTITIES.length; i++){
+        //    console.log("destroy");
+        //    console.dir(DATASTORE.ENTITIES[i]);
+        //    if(DATASTORE.ENTITIES[i].chr == '&' || DATASTORE.ENTITIES[i].chr == '#'){
+        //      DATASTORE.ENTITIES[i].destroy();
+        //      console.log("destroy");
+        //    }
+        //  }
+        this.clearCurrentLevel();
         this.startNewLevel(_datastore.DATASTORE.ENTITIES[this._STATE.avatarId], this._STATE.newXDim, this._STATE.newYDim, this._STATE.level);
       }
       if (_datastore.DATASTORE.ENTITIES[this._STATE.avatarId].getWin()) {
@@ -16148,7 +16188,7 @@ var UIModeHelp = exports.UIModeHelp = function (_UIMode4) {
       this.display.drawText(1, 13, "0 - portals to different realms", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 14, "& - dangerous monsters", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 15, "* - home", _color.Color.FG, _color.Color.BG);
-      this.display.drawText(1, 16, "# - Moss- kill for extra points", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 16, "# - Moss- destroy for health and points", _color.Color.FG, _color.Color.BG);
     }
   }, {
     key: 'handleInput',
@@ -16247,6 +16287,9 @@ var UIModeLose = exports.UIModeLose = function (_UIMode7) {
       this.display.drawText(1, 3, "you lose.", _color.Color.FG, _color.Color.BG);
       _message.Message.send("entering " + this.constructor.name);
     }
+  }, {
+    key: 'renderAvatar',
+    value: function renderAvatar() {}
   }]);
 
   return UIModeLose;
@@ -16399,21 +16442,21 @@ var PlayerMessage = exports.PlayerMessage = {
   },
   LISTENERS: {
     'wallBlocked': function wallBlocked(evtData) {
-      console.log("wall");
-      console.dir(_message.Message);
       _message.Message.send('can\'t move there because ' + evtData.reason);
     },
     'attacks': function attacks(evtData) {
-      console.log(evtData.target.getName() + "attacked");
       _message.Message.send(this.getName() + " attacks " + evtData.target.getName());
     },
     'damages': function damages(evtData) {
-      _message.Message.send(this.getName() + " deals " + evtData.damageAmount + " damage to" + evtData.target.getName());
+      _message.Message.send(this.getName() + " deals " + evtData.damageAmount + " damage to " + evtData.target.getName());
     },
     'kills': function kills(evtData) {
       _message.Message.send(this.getName() + " kills " + evtData.target.getName());
     },
     'killedBy': function killedBy(evtData) {
+      if (evtData.target.chr == '#' && this.chr == '@') {
+        this.gainHp(20);
+      }
       _message.Message.send(evtData.target.getName() + " was killed by " + this.getName());
     }
   }
@@ -16550,7 +16593,7 @@ var HitPoints = exports.HitPoints = {
     'damaged': function damaged(evtData) {
       //evtData.src
       this.loseHp(evtData.damageAmount);
-      evtData.src.raiseMixinEvent('damages', { target: this, damageAmount: evtData.damageAmount });
+      evtData.src.raiseMixinEvent('damages', { target: evtData.target, damageAmount: evtData.damageAmount, src: evtData.src });
       console.log("hp " + this.getHp());
 
       if (this.getHp() <= 0) {
@@ -16560,7 +16603,9 @@ var HitPoints = exports.HitPoints = {
         console.dir(evtData.src);
         if (evtData.src.chr == "@") {
           this.raiseMixinEvent('scoreEvent', { monsterHp: this.getMaxHp(), avatar: evtData.src });
-        } else if (evtData.target.chr == "@") {
+        } else if (this.chr == "@") {
+          console.log("you suck");
+          console.dir(this);
           evtData.target.setLose(true);
           _timing.TIME_ENGINE.lock();
         }
@@ -16824,17 +16869,12 @@ var ActorAttacker = exports.ActorAttacker = {
           newX = this.state.x * 1 + x * 1;
           newY = this.state.y * 1 + y * 1;
           var targetPositionInfo = this.getMap().getTargetPositionInfo(newX, newY);
-          console.log("actorAttacker working");
-          console.dir(targetPositionInfo.entity);
-          console.log("x: " + x + ", y: " + y);
           if (targetPositionInfo.entity && targetPositionInfo.entity.chr != this.chr) {
             this.raiseMixinEvent('tryWalking', { 'dx': x, 'dy': y });
-            console.log("actorAttacker working2");
             return;
           }
         }
       }
-      console.log("actorAttacker not working2");
 
       var dx = (0, _util.randomInt)(-1, 1);
       var dy = (0, _util.randomInt)(-1, 1);
@@ -16854,7 +16894,6 @@ var ActorAttacker = exports.ActorAttacker = {
       setTimeout(function () {
         _timing.TIME_ENGINE.unlock();
       }, 1);
-      console.log("Attacker still working");
     }
   }
 };
@@ -17195,7 +17234,6 @@ var KEY_BINDINGS = {
   },
   'persistence': {
     'NEW_GAME': ['key:n,altKey:false,ctrlKey:false,shiftKey:false', 'key:N,altKey:false,ctrlKey:false,shiftKey:true'],
-    //'HELP':         ['key:h,altKey:false,ctrlKey:false,shiftKey:false'],
     'SAVE_GAME': ['key:s,altKey:false,ctrlKey:false,shiftKey:false', 'key:S,altKey:false,ctrlKey:false,shiftKey:true'],
     'LOAD_GAME': ['key:l,altKey:false,ctrlKey:false,shiftKey:false', 'key:L,altKey:false,ctrlKey:false,shiftKey:true']
   },

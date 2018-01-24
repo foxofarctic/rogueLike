@@ -64,7 +64,6 @@ let KEY_BINDINGS = {
   'persistence': {
     'NEW_GAME': ['key:n,altKey:false,ctrlKey:false,shiftKey:false',
                  'key:N,altKey:false,ctrlKey:false,shiftKey:true'],
-    //'HELP':         ['key:h,altKey:false,ctrlKey:false,shiftKey:false'],
     'SAVE_GAME': ['key:s,altKey:false,ctrlKey:false,shiftKey:false',
                 'key:S,altKey:false,ctrlKey:false,shiftKey:true'],
     'LOAD_GAME': ['key:l,altKey:false,ctrlKey:false,shiftKey:false',

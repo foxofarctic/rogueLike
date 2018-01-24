@@ -232,6 +232,12 @@ export class UIModePlay extends UIMode {
   //  }
   }
 
+  clearCurrentLevel() {
+    let currentMap = this.getMap();
+    let listOfEntitiesOnMap = currentMap.getListOfEntities();
+    //if(let i = 0)
+  }
+
   startNewLevel(avatar, x, y, level) {
     //initTiming();
     //this._STATE = {};0
@@ -291,6 +297,8 @@ export class UIModePlay extends UIMode {
     display.drawText(0, 4, "Max HP: " + this.getAvatar().getMaxHp());
     display.drawText(0, 5, "Current HP: " + this.getAvatar().getHp());
     display.drawText(0, 6, "Treasure: " + this.getAvatar().getScore());
+    display.drawText(0, 7, "Level: " + this._STATE.level);
+
   }
 
   handleInput(inputType,inputData) {
@@ -339,6 +347,17 @@ export class UIModePlay extends UIMode {
      this._STATE.newYDim = this._STATE.newYDim + 10;
      this._STATE.level++;
      DATASTORE.ENTITIES[this._STATE.avatarId].setNewLevel(false);
+     //console.log("levels: " + DATASTORE.ENTITIES.length()  );
+     // destroy old monsters
+    //  for(let i = 0; i < DATASTORE.ENTITIES.length; i++){
+    //    console.log("destroy");
+    //    console.dir(DATASTORE.ENTITIES[i]);
+    //    if(DATASTORE.ENTITIES[i].chr == '&' || DATASTORE.ENTITIES[i].chr == '#'){
+    //      DATASTORE.ENTITIES[i].destroy();
+    //      console.log("destroy");
+    //    }
+    //  }
+     this.clearCurrentLevel();
      this.startNewLevel(DATASTORE.ENTITIES[this._STATE.avatarId], this._STATE.newXDim, this._STATE.newYDim, this._STATE.level );
    }
    if( DATASTORE.ENTITIES[this._STATE.avatarId].getWin() ){
@@ -357,7 +376,7 @@ export class UIModePlay extends UIMode {
       DATASTORE.ENTITIES[this._STATE.avatarId].addTime(1);
       this.moveCameraToAvatar();
       //this.render();
-    } 
+    }
   }
 
   moveCameraToAvatar(){
@@ -386,7 +405,7 @@ export class UIModeHelp extends UIMode{
     this.display.drawText(1, 13, "0 - portals to different realms", Color.FG, Color.BG);
     this.display.drawText(1, 14, "& - dangerous monsters", Color.FG, Color.BG);
     this.display.drawText(1, 15, "* - home", Color.FG, Color.BG);
-    this.display.drawText(1, 16, "# - Moss- kill for extra points", Color.FG, Color.BG);
+    this.display.drawText(1, 16, "# - Moss- destroy for health and points", Color.FG, Color.BG);
 
   }
 
@@ -440,4 +459,5 @@ export class UIModeLose extends UIMode {
     this.display.drawText(1,3,"you lose.",Color.FG,Color.BG);
     Message.send("entering " + this.constructor.name);
   }
+  renderAvatar(){}
 }
