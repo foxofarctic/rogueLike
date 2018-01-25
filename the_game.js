@@ -15997,9 +15997,14 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
   }, {
     key: 'clearCurrentLevel',
     value: function clearCurrentLevel() {
-      var currentMap = this.getMap();
+      var currentMap = this.getAvatar().getMap();
       var listOfEntitiesOnMap = currentMap.getListOfEntities();
-      //if(let i = 0)
+      for (var i = 0; i < listOfEntitiesOnMap.length; i++) {
+        if (listOfEntitiesOnMap[i].chr != '@') {
+          console.log("old entities destroyed");
+          listOfEntitiesOnMap[i].destroy();
+        }
+      }
     }
   }, {
     key: 'startNewLevel',

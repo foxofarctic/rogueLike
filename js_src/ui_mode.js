@@ -233,9 +233,14 @@ export class UIModePlay extends UIMode {
   }
 
   clearCurrentLevel() {
-    let currentMap = this.getMap();
+    let currentMap = this.getAvatar().getMap();
     let listOfEntitiesOnMap = currentMap.getListOfEntities();
-    //if(let i = 0)
+    for(let i = 0; i < listOfEntitiesOnMap.length; i++){
+      if(listOfEntitiesOnMap[i].chr != '@' ){
+        console.log("old entities destroyed");
+        listOfEntitiesOnMap[i].destroy();
+      }
+    }
   }
 
   startNewLevel(avatar, x, y, level) {
