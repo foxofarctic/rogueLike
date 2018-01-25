@@ -24,7 +24,7 @@ EntityFactory.learn({
 });
 
 EntityFactory.learn({
-    'name': 'monster',
+    'name': 'snipe',
     'chr': '&',
     'fg': '#d63',
     'maxHp': 5,
