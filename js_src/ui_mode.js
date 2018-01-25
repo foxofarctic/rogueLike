@@ -225,7 +225,7 @@ export class UIModePlay extends UIMode {
       m.addEntityAtRandomPosition(EntityFactory.create('moss'));
     }
     for(let monsterCount = 0; monsterCount < 4;monsterCount++){
-      m.addEntityAtRandomPosition(EntityFactory.create('monster'));
+      m.addEntityAtRandomPosition(EntityFactory.create('snipe'));
     }
     //for(let portalCount = 0; portalCount<1; portalCount++){
     m.addEntityAtRandomPosition(EntityFactory.create('portal'));
@@ -244,12 +244,8 @@ export class UIModePlay extends UIMode {
   }
 
   startNewLevel(avatar, x, y, level) {
-    //initTiming();
-    //this._STATE = {};0
-    // x = 20 + x;
-    // y = 20 + y;
     let m = MapMaker({xdim: x,ydim: y});
-    //m.build();
+
     this._STATE.curMapId = m.getId();
     this._STATE.cameraMapLoc = {
       x: Math.round(m.getXDim()/2),
@@ -260,8 +256,6 @@ export class UIModePlay extends UIMode {
       y: Math.round(this.display.getOptions().height/2)
     };
 
-    //DisplaySymbol({'name': 'avatar', 'chr':'@', 'fg' '#eb4'});
-    //let a = EntityFactory.create('avatar');
     this._STATE.avatarId = avatar.getId();
     m.addEntityAtRandomPosition(avatar);
     this.moveCameraToAvatar();
@@ -269,8 +263,8 @@ export class UIModePlay extends UIMode {
     for(let mossCount = 0; mossCount< (5*level) ; mossCount++){
       m.addEntityAtRandomPosition(EntityFactory.create('moss'));
     }
-    for(let monsterCount = 0; monsterCount < (5*level);monsterCount++){
-      m.addEntityAtRandomPosition(EntityFactory.create('monster'));
+    for(let monsterCount = 0; monsterCount < (10*level);monsterCount++){
+      m.addEntityAtRandomPosition(EntityFactory.create('snipe'));
     }
     if (level < 20){
       m.addEntityAtRandomPosition(EntityFactory.create('portal'));
@@ -352,16 +346,7 @@ export class UIModePlay extends UIMode {
      this._STATE.newYDim = this._STATE.newYDim + 10;
      this._STATE.level++;
      DATASTORE.ENTITIES[this._STATE.avatarId].setNewLevel(false);
-     //console.log("levels: " + DATASTORE.ENTITIES.length()  );
-     // destroy old monsters
-    //  for(let i = 0; i < DATASTORE.ENTITIES.length; i++){
-    //    console.log("destroy");
-    //    console.dir(DATASTORE.ENTITIES[i]);
-    //    if(DATASTORE.ENTITIES[i].chr == '&' || DATASTORE.ENTITIES[i].chr == '#'){
-    //      DATASTORE.ENTITIES[i].destroy();
-    //      console.log("destroy");
-    //    }
-    //  }
+
      this.clearCurrentLevel();
      this.startNewLevel(DATASTORE.ENTITIES[this._STATE.avatarId], this._STATE.newXDim, this._STATE.newYDim, this._STATE.level );
    }
@@ -408,7 +393,7 @@ export class UIModeHelp extends UIMode{
     this.display.drawText(1, 10, "p - pause/ enter persistence mode", Color.FG, Color.BG);
     this.display.drawText(1, 11, "h - help screen", Color.FG, Color.BG);
     this.display.drawText(1, 13, "0 - portals to different realms", Color.FG, Color.BG);
-    this.display.drawText(1, 14, "& - dangerous monsters", Color.FG, Color.BG);
+    this.display.drawText(1, 14, "& - dangerous snipes", Color.FG, Color.BG);
     this.display.drawText(1, 15, "* - home", Color.FG, Color.BG);
     this.display.drawText(1, 16, "# - Moss- destroy for health and points", Color.FG, Color.BG);
 
@@ -447,8 +432,6 @@ export class UIModeWin extends UIMode {
   render() {
     this.display.drawText(1,1,"game win", Color.FG,Color.BG);
     this.display.drawText(1,3,"you WIN!!", Color.FG,Color.BG);
-    //this.display.drawText(1, 4, "Score: " + this.getAvatar().getScore());
-    //this.display.drawText(1, 5, "time: " + this.getAvatar().getTime());
     Message.send("entering " + this.constructor.name);
   }
 

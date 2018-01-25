@@ -15988,7 +15988,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('moss'));
       }
       for (var monsterCount = 0; monsterCount < 4; monsterCount++) {
-        m.addEntityAtRandomPosition(_entities.EntityFactory.create('monster'));
+        m.addEntityAtRandomPosition(_entities.EntityFactory.create('snipe'));
       }
       //for(let portalCount = 0; portalCount<1; portalCount++){
       m.addEntityAtRandomPosition(_entities.EntityFactory.create('portal'));
@@ -16009,12 +16009,8 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
   }, {
     key: 'startNewLevel',
     value: function startNewLevel(avatar, x, y, level) {
-      //initTiming();
-      //this._STATE = {};0
-      // x = 20 + x;
-      // y = 20 + y;
       var m = (0, _map.MapMaker)({ xdim: x, ydim: y });
-      //m.build();
+
       this._STATE.curMapId = m.getId();
       this._STATE.cameraMapLoc = {
         x: Math.round(m.getXDim() / 2),
@@ -16025,8 +16021,6 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
         y: Math.round(this.display.getOptions().height / 2)
       };
 
-      //DisplaySymbol({'name': 'avatar', 'chr':'@', 'fg' '#eb4'});
-      //let a = EntityFactory.create('avatar');
       this._STATE.avatarId = avatar.getId();
       m.addEntityAtRandomPosition(avatar);
       this.moveCameraToAvatar();
@@ -16034,8 +16028,8 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
       for (var mossCount = 0; mossCount < 5 * level; mossCount++) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('moss'));
       }
-      for (var monsterCount = 0; monsterCount < 5 * level; monsterCount++) {
-        m.addEntityAtRandomPosition(_entities.EntityFactory.create('monster'));
+      for (var monsterCount = 0; monsterCount < 10 * level; monsterCount++) {
+        m.addEntityAtRandomPosition(_entities.EntityFactory.create('snipe'));
       }
       if (level < 20) {
         m.addEntityAtRandomPosition(_entities.EntityFactory.create('portal'));
@@ -16118,16 +16112,7 @@ var UIModePlay = exports.UIModePlay = function (_UIMode3) {
         this._STATE.newYDim = this._STATE.newYDim + 10;
         this._STATE.level++;
         _datastore.DATASTORE.ENTITIES[this._STATE.avatarId].setNewLevel(false);
-        //console.log("levels: " + DATASTORE.ENTITIES.length()  );
-        // destroy old monsters
-        //  for(let i = 0; i < DATASTORE.ENTITIES.length; i++){
-        //    console.log("destroy");
-        //    console.dir(DATASTORE.ENTITIES[i]);
-        //    if(DATASTORE.ENTITIES[i].chr == '&' || DATASTORE.ENTITIES[i].chr == '#'){
-        //      DATASTORE.ENTITIES[i].destroy();
-        //      console.log("destroy");
-        //    }
-        //  }
+
         this.clearCurrentLevel();
         this.startNewLevel(_datastore.DATASTORE.ENTITIES[this._STATE.avatarId], this._STATE.newXDim, this._STATE.newYDim, this._STATE.level);
       }
@@ -16191,7 +16176,7 @@ var UIModeHelp = exports.UIModeHelp = function (_UIMode4) {
       this.display.drawText(1, 10, "p - pause/ enter persistence mode", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 11, "h - help screen", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 13, "0 - portals to different realms", _color.Color.FG, _color.Color.BG);
-      this.display.drawText(1, 14, "& - dangerous monsters", _color.Color.FG, _color.Color.BG);
+      this.display.drawText(1, 14, "& - dangerous snipes", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 15, "* - home", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 16, "# - Moss- destroy for health and points", _color.Color.FG, _color.Color.BG);
     }
@@ -16260,8 +16245,6 @@ var UIModeWin = exports.UIModeWin = function (_UIMode6) {
     value: function render() {
       this.display.drawText(1, 1, "game win", _color.Color.FG, _color.Color.BG);
       this.display.drawText(1, 3, "you WIN!!", _color.Color.FG, _color.Color.BG);
-      //this.display.drawText(1, 4, "Score: " + this.getAvatar().getScore());
-      //this.display.drawText(1, 5, "time: " + this.getAvatar().getTime());
       _message.Message.send("entering " + this.constructor.name);
     }
   }, {
@@ -16942,7 +16925,7 @@ EntityFactory.learn({
 });
 
 EntityFactory.learn({
-  'name': 'monster',
+  'name': 'snipe',
   'chr': '&',
   'fg': '#d63',
   'maxHp': 5,
