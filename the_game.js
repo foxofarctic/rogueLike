@@ -16185,7 +16185,7 @@ var UIModeHelp = exports.UIModeHelp = function (_UIMode4) {
     value: function handleInput(inputType, inputData) {
       // super.handleInput(inputType, inputData);
       if ((0, _command.getCommandFromInput)(inputType, inputData) == _command.COMMAND.HELP) {
-        this.game.switchMode('play');
+        this.game.switchMode('persistence');
       }
     }
   }]);
