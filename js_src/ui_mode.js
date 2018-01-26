@@ -402,7 +402,7 @@ export class UIModeHelp extends UIMode{
   handleInput(inputType,inputData) {
     // super.handleInput(inputType, inputData);
     if (getCommandFromInput(inputType,inputData) == COMMAND.HELP) {
-      this.game.switchMode('play');
+      this.game.switchMode('persistence');
     }
   }
 

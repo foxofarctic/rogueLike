@@ -16,3 +16,6 @@ This is the project plan for Lucas Game. This covers general planning thoughts i
 - implement a rest function to gain hp
 - create items (restore hp, more points, etc.)
 - allow monsters to deal damage
+- create different levels with varied levels of difficulty
+- portal system to different levels
+- create a home entity
